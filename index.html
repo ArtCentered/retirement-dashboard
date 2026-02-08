@@ -1727,12 +1727,13 @@
                 }
 
                 // Calculate payoff year with extra principal
-                const fullExtraPrincipal = extraPrincipal * 2; // Convert 50% share to full
+                // extraPrincipal is the user input (50% share) - double it for full property amount
+                const fullExtraPrincipal = extraPrincipal * 2;
                 const payoffYear = calculateMortgagePayoff(
                     prop.mortgageBalance,
                     prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12, // Just P&I
                     prop.mortgageRate,
-                    prop.extraPrincipal + fullExtraPrincipal,
+                    fullExtraPrincipal,
                     baseData.currentYear
                 );
 
@@ -1815,19 +1816,19 @@
         function updateRentalDisplays() {
             const r = getRentalInputValues();
 
-            // Calculate payoff years
+            // Calculate payoff years (user input is 50% share, double for full property)
             const daneboPayoff = calculateMortgagePayoff(
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                r.daneboExtraPrincipal * 2,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                r.centuryExtraPrincipal * 2,
                 baseData.currentYear
             );
 
@@ -1984,19 +1985,19 @@
                     investStatus;
             }
 
-            // Calculate rental payoff years for totals
+            // Calculate rental payoff years for totals (user input is 50% share, double for full)
             const daneboPayoff = calculateMortgagePayoff(
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                r.daneboExtraPrincipal * 2,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                r.centuryExtraPrincipal * 2,
                 baseData.currentYear
             );
 
@@ -2060,7 +2061,8 @@
 
         // Calculate portfolio with dynamic contributions (stops when each person retires)
         // Supports multiple contribution changes: array of {person, year, amount} objects
-        function calculatePortfolioWithRetirements(years, returnRate, contribGrowth, mikeRetireYear, travisRetireYear, mikeContribStart, travisContribStart, changes = []) {
+        // withdrawalRate: annual withdrawal rate applied post-retirement to model portfolio drawdown
+        function calculatePortfolioWithRetirements(years, returnRate, contribGrowth, mikeRetireYear, travisRetireYear, mikeContribStart, travisContribStart, changes = [], withdrawalRate = 0) {
             let value = baseData.currentPortfolio;
             let mikeContrib = mikeContribStart;
             let travisContrib = travisContribStart;
@@ -2123,6 +2125,20 @@
                 const growth = (value + yearContrib / 2) * returnRate;
                 value = value + yearContrib + growth + saleProceeds;
 
+                // Deduct withdrawals post-retirement
+                let withdrawal = 0;
+                if (mikeRetired && travisRetired) {
+                    // Both retired: full withdrawal rate
+                    withdrawal = value * withdrawalRate;
+                } else if (mikeRetired) {
+                    // Only Mike retired: ~40% of full withdrawal (his portion)
+                    withdrawal = value * withdrawalRate * 0.4;
+                } else if (travisRetired) {
+                    // Only Travis retired: ~30% of full withdrawal (has pension)
+                    withdrawal = value * withdrawalRate * 0.3;
+                }
+                value = Math.max(0, value - withdrawal);
+
                 projections.push({
                     year: i,
                     calendarYear: calYear,
@@ -2132,6 +2148,7 @@
                     mikeRetired: mikeRetired,
                     travisRetired: travisRetired,
                     contribution: yearContrib,
+                    withdrawal: withdrawal,
                     mikeContrib: mikeRetired ? 0 : mikeContrib,
                     travisContrib: travisRetired ? 0 : travisContrib
                 });
@@ -2239,11 +2256,20 @@
         }
 
         // Calculate Social Security (reduced if taken early)
+        // SSA actual formula: 5/9 of 1% per month for first 36 months early (6.67%/yr),
+        // then 5/12 of 1% per month for additional months (5%/yr) up to 60 months early
         function calculateSS(fullBenefit, claimAge) {
             if (claimAge >= 67) return fullBenefit * 12;
             if (claimAge >= 62) {
-                // Roughly 6.67% reduction per year before 67
-                const reduction = (67 - claimAge) * 0.0667;
+                const monthsEarly = (67 - claimAge) * 12;
+                let reduction = 0;
+                if (monthsEarly <= 36) {
+                    // First 36 months: 5/9 of 1% per month
+                    reduction = monthsEarly * (5 / 9 / 100);
+                } else {
+                    // First 36 months at 5/9 of 1%, remaining at 5/12 of 1%
+                    reduction = 36 * (5 / 9 / 100) + (monthsEarly - 36) * (5 / 12 / 100);
+                }
                 return fullBenefit * 12 * (1 - reduction);
             }
             return 0; // Can't claim before 62
@@ -2277,7 +2303,7 @@
 
             // Project portfolio for 35 years
             // Build step changes object
-            const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges);
+            const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges, v.withdrawalRate);
 
             // Calculate phases
             const phases = [];
@@ -2370,10 +2396,11 @@
                 let expenses = baseRetirementExpenses * Math.pow(1 + v.inflationRate, yearsFromNow);
 
                 // Add healthcare costs for each retired person before Medicare (65)
-                // Healthcare cost input is per-person
+                // Healthcare cost input is per-person in today's dollars, inflation-adjusted
+                const inflatedHealthcare = v.healthcareCost * Math.pow(1 + v.inflationRate, yearsFromNow);
                 let healthcareNeeded = 0;
-                if (mikeRetired && mikeAge < 65) healthcareNeeded += v.healthcareCost;
-                if (travisRetired && travisAge < 65) healthcareNeeded += v.healthcareCost;
+                if (mikeRetired && mikeAge < 65) healthcareNeeded += inflatedHealthcare;
+                if (travisRetired && travisAge < 65) healthcareNeeded += inflatedHealthcare;
                 expenses += healthcareNeeded;
 
                 // Subtract mortgage savings when home mortgage is paid off
@@ -2386,7 +2413,8 @@
                 const prevBothRetired = (prevPhaseYear > mikeRetireYear) && (prevPhaseYear > travisRetireYear);
                 if (bothRetired && !prevBothRetired) {
                     // This is first phase of full retirement - spread one-time over ~5 years
-                    expenses += v.oneTimeExpenses / 5;
+                    // Inflation-adjust from today's dollars to future dollars
+                    expenses += (v.oneTimeExpenses * Math.pow(1 + v.inflationRate, yearsFromNow)) / 5;
                 }
 
                 const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome;
@@ -2591,16 +2619,21 @@
             });
         }
 
-        function renderIncomeBar(phases) {
-            // Find the phase where BOTH people have retired (full retirement)
-            // Need to find a phase where both pension > 0 and portfolioIncome > 0
-            // OR the last phase if that has income
-            let fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
-
-            // If no phase has both, check if the last phase has any income
-            if (!fullRetirePhase) {
-                fullRetirePhase = phases[phases.length - 1];
+        function findFullRetirePhase(phases) {
+            const v = getInputValues();
+            const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+            // Find the first phase where BOTH people have retired
+            let phase = phases.find(p => p.year >= mikeRetireYear && p.year >= travisRetireYear && p.totalIncome > 0);
+            // Fallback to last phase with any income
+            if (!phase) {
+                phase = [...phases].reverse().find(p => p.totalIncome > 0);
             }
+            return phase || phases[phases.length - 1];
+        }
+
+        function renderIncomeBar(phases) {
+            let fullRetirePhase = findFullRetirePhase(phases);
 
             if (!fullRetirePhase || fullRetirePhase.totalIncome === 0) {
                 document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">Select retirement ages to see income breakdown</div>';
@@ -2694,9 +2727,9 @@
                 reductionEl.style.color = '#4ade80';
             }
 
-            // Find full retirement phase
-            const fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
-            if (fullRetirePhase) {
+            // Find full retirement phase (both retired with income)
+            const fullRetirePhase = findFullRetirePhase(phases);
+            if (fullRetirePhase && fullRetirePhase.totalIncome > 0) {
                 document.getElementById('totalIncomePreview').textContent = formatCurrency(fullRetirePhase.totalIncome) + '/yr';
                 const gap = fullRetirePhase.surplus;
                 document.getElementById('gapValue').textContent = (gap >= 0 ? '+' : '') + formatCurrency(gap);
