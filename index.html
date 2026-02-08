@@ -115,8 +115,7 @@
             display: none;
             position: absolute;
             top: calc(100% + 8px);
-            left: auto;
-            right: 0;
+            left: -6px;
             width: 280px;
             max-width: 90vw;
             padding: 14px;
@@ -132,12 +131,7 @@
             word-wrap: break-word;
         }
         .tooltip::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            right: 12px;
-            border: 8px solid transparent;
-            border-bottom-color: #1e293b;
+            display: none;
         }
 
         /* Collapsible sections */
@@ -1404,6 +1398,31 @@
     </div>
 
     <script>
+        // Keep tooltips within viewport
+        document.addEventListener('mouseover', function(e) {
+            const tip = e.target.closest('.info-tip');
+            if (!tip) return;
+            const tooltip = tip.querySelector('.tooltip');
+            if (!tooltip) return;
+            // Reset to default positioning
+            tooltip.style.left = '-6px';
+            tooltip.style.right = 'auto';
+            // Wait for display, then check bounds
+            requestAnimationFrame(() => {
+                const rect = tooltip.getBoundingClientRect();
+                if (rect.right > window.innerWidth - 8) {
+                    // Overflows right — flip to open leftward
+                    tooltip.style.left = 'auto';
+                    tooltip.style.right = '-6px';
+                }
+                if (rect.left < 8) {
+                    // Overflows left — push right
+                    tooltip.style.left = (-rect.left + 8) + 'px';
+                    tooltip.style.right = 'auto';
+                }
+            });
+        });
+
         // Theme toggle functionality
         function toggleTheme() {
             const html = document.documentElement;
