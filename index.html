@@ -1485,8 +1485,8 @@
         // Update chart colors for theme
         function updateChartColors() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-            const textColor = isDark ? '#888' : '#666';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+            const textColor = '#888';
 
             if (chart && chart.options) {
                 chart.options.scales.x.grid.color = gridColor;
@@ -2651,23 +2651,34 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: {
+                                color: document.documentElement.getAttribute('data-theme') === 'dark'
+                                    ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+                            },
                             ticks: {
-                                color: '#666',
-                                maxTicksLimit: 10,
+                                color: '#888',
+                                maxTicksLimit: 12,
+                                autoSkip: true,
+                                maxRotation: 0,
                                 callback: function(value, index) {
                                     const p = projections[index];
-                                    if (p.calendarYear === mikeRetireYear) return `${p.calendarYear}\n(M:${p.mikeAge})`;
-                                    if (p.calendarYear === travisRetireYear) return `${p.calendarYear}\n(T:${p.travisAge})`;
-                                    return index % 5 === 0 ? p.calendarYear : '';
+                                    if (p.calendarYear === mikeRetireYear) return `${p.calendarYear} (M:${p.mikeAge})`;
+                                    if (p.calendarYear === travisRetireYear) return `${p.calendarYear} (T:${p.travisAge})`;
+                                    if (p.calendarYear % 5 === 0) return p.calendarYear;
+                                    return '';
                                 }
                             }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: {
+                                color: document.documentElement.getAttribute('data-theme') === 'dark'
+                                    ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+                            },
                             ticks: {
-                                color: '#666',
-                                callback: value => '$' + (value / 1000000).toFixed(1) + 'M'
+                                color: '#888',
+                                callback: value => value >= 1000000
+                                    ? '$' + (value / 1000000).toFixed(1) + 'M'
+                                    : '$' + (value / 1000).toFixed(0) + 'K'
                             }
                         }
                     }
