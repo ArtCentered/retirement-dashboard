@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Planning Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/2.1.0/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* CSS Variables for theming */
+        :root {
+            /* Light mode (default) */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0f2f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --border-light: #edf2f7;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --card-bg: #ffffff;
+            --input-bg: #f7fafc;
+            --input-border: #e2e8f0;
+            --accent: #3182ce;
+            --accent-light: #ebf8ff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: rgba(255,255,255,0.05);
+            --bg-tertiary: rgba(255,255,255,0.03);
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+            --border-color: rgba(255,255,255,0.1);
+            --border-light: rgba(255,255,255,0.05);
+            --shadow: 0 2px 8px rgba(0,0,0,0.3);
+            --card-bg: rgba(255,255,255,0.05);
+            --input-bg: rgba(255,255,255,0.08);
+            --input-border: rgba(255,255,255,0.15);
+            --accent: #4facfe;
+            --accent-light: rgba(79,172,254,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header with theme toggle */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Theme toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover { background: var(--accent-light); }
+
+        /* Tooltip system */
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: #3182ce;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: help;
+            margin-left: 6px;
+            position: relative;
+        }
+        .info-tip:hover .tooltip,
+        .info-tip:focus .tooltip {
+            display: block;
+        }
+        .tooltip,
+        .info-tip .tooltip,
+        span.tooltip {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: auto;
+            right: 0;
+            width: 280px;
+            max-width: 90vw;
+            padding: 14px;
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border-radius: 8px;
+            font-size: 0.85rem !important;
+            font-weight: 400 !important;
+            line-height: 1.6;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            text-align: left;
+            word-wrap: break-word;
+        }
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            right: 12px;
+            border: 8px solid transparent;
+            border-bottom-color: #1e293b;
+        }
+
+        /* Collapsible sections */
+        .collapsible-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            overflow: visible;
+        }
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.2s;
+        }
+        .collapsible-header:hover { background: var(--accent-light); }
+        .collapsible-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .collapse-icon {
+            transition: transform 0.3s;
+            color: var(--text-muted);
+        }
+        .collapsible-section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        .collapsible-content {
+            padding: 20px;
+            transition: max-height 0.3s ease-out;
+        }
+        .collapsible-section.collapsed .collapsible-content {
+            display: none;
+        }
+
+        /* Retirement Status Banner */
+        .status-banner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .status-banner.green {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1));
+            border: 2px solid #4ade80;
+        }
+        .status-banner.yellow {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+            border: 2px solid #fbbf24;
+        }
+        .status-banner.red {
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.15), rgba(239, 68, 68, 0.1));
+            border: 2px solid #f87171;
+        }
+        .status-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .status-banner.green .status-icon { background: rgba(74, 222, 128, 0.2); }
+        .status-banner.yellow .status-icon { background: rgba(251, 191, 36, 0.2); }
+        .status-banner.red .status-icon { background: rgba(248, 113, 113, 0.2); }
+        .status-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .status-banner.green .status-title { color: #4ade80; }
+        .status-banner.yellow .status-title { color: #fbbf24; }
+        .status-banner.red .status-title { color: #f87171; }
+        .status-detail {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .card-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .card-value { font-size: 1.5rem; font-weight: 700; margin-top: 5px; }
+        .card-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; }
+        .green { color: #4ade80; }
+        .blue { color: #60a5fa; }
+        .yellow { color: #fbbf24; }
+        .red { color: #f87171; }
+        .purple { color: #a78bfa; }
+        .orange { color: #fb923c; }
+
+        /* Controls Section */
+        .controls-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .controls-title { font-size: 1rem; font-weight: 600; margin-bottom: 20px; color: var(--accent); }
+        .controls-subtitle { font-size: 0.85rem; color: var(--text-muted); margin: 20px 0 15px 0; padding-top: 15px; border-top: 1px solid var(--border-color); }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .control-group { }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+        .control-label span:first-child { color: var(--text-secondary); }
+        .control-label span:last-child { font-weight: 600; }
+        .control-label .mike-color { color: #60a5fa; }
+        .control-label .travis-color { color: #4ade80; }
+        .control-label .default-color { color: var(--accent); }
+
+        /* Number inputs (replacing sliders) */
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-group input[type="number"] {
+            width: 80px;
+            padding: 8px 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .input-group .unit {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 6px 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .number-input-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .currency-prefix {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .input-suffix {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .contrib-input {
+            width: 100px;
+            padding: 8px 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .contrib-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .contrib-input.mike-border:focus { border-color: #60a5fa; }
+        .contrib-input.travis-border:focus { border-color: #4ade80; }
+        .contrib-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .contrib-input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+
+        /* Keep range slider styles for now but hidden */
+        input[type="range"] { display: none; }
+
+        /* Contribution Changes Table */
+        .changes-table-container {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .changes-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .changes-table th {
+            text-align: left;
+            padding: 8px 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .changes-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .changes-table tr:last-child td { border-bottom: none; }
+        .changes-table .person-mike { color: #60a5fa; }
+        .changes-table .person-travis { color: #4ade80; }
+        .changes-table input {
+            width: 80px;
+            padding: 6px 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+        .changes-table input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .changes-table select {
+            padding: 6px 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+        .changes-table select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .btn-remove {
+            background: rgba(248, 113, 113, 0.2);
+            border: none;
+            color: #f87171;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-remove:hover { background: rgba(248, 113, 113, 0.3); }
+        .btn-add {
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-add:hover { background: var(--accent); color: white; }
+        .btn-add:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .changes-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 10px;
+        }
+        .empty-changes {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Rental Properties Styles */
+        .rental-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .rental-card {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+        }
+        .rental-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .rental-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fb923c;
+        }
+        .rental-card-address {
+            font-size: 0.7rem;
+            color: #666;
+        }
+        .rental-status {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .rental-status.active {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .rental-status.sold {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+        .rental-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+        .rental-stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .rental-stat-label {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+        }
+        .rental-stat-value {
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .rental-net-income {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rental-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .rental-input-row label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 100px;
+        }
+        .rental-input-row input[type="number"] {
+            width: 80px;
+        }
+        .rental-input-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #fb923c;
+        }
+        .sell-options {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(248, 113, 113, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .sell-options.hidden { display: none; }
+        .bar-rental { background: #fb923c; }
+
+        /* Results Section */
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .results-section { grid-template-columns: 1fr; }
+        }
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .result-title { font-size: 1rem; font-weight: 600; margin-bottom: 15px; }
+
+        /* Scenarios Table */
+        .scenarios-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .scenarios-table th, .scenarios-table td {
+            padding: 10px 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .scenarios-table th { color: var(--text-muted); font-weight: 500; font-size: 0.7rem; }
+        .scenarios-table th:first-child, .scenarios-table td:first-child { text-align: left; }
+        .scenarios-table tr:hover { background: var(--bg-tertiary); }
+        .highlight-row { background: var(--accent-light) !important; }
+        .success-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .success-badge.yes { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .success-badge.maybe { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .success-badge.no { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+        .age-display { font-size: 0.65rem; color: var(--text-muted); }
+
+        /* Chart Container */
+        .chart-container { height: 320px; position: relative; }
+
+        /* Person Cards */
+        .person-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .person-section { grid-template-columns: 1fr; }
+        }
+        .person-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .person-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; }
+        .person-name.mike { color: #60a5fa; }
+        .person-name.travis { color: #4ade80; }
+        .account-list { font-size: 0.85rem; }
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .account-item:last-child { border-bottom: none; }
+        .account-name { color: var(--text-secondary); }
+        .account-value { font-weight: 500; }
+
+        /* Income Breakdown Section */
+        .income-breakdown {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .income-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .income-bar div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .bar-pension { background: #fbbf24; }
+        .bar-portfolio { background: #4facfe; }
+        .bar-ss { background: #a78bfa; }
+        .income-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Chart tooltip custom */
+        .chart-tooltip {
+            background: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 10px !important;
+        }
+
+        /* Helper text */
+        .helper-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Note boxes */
+        .note-box {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .note-box.info { background: var(--accent-light); }
+        .note-box.warning { background: rgba(251, 191, 36, 0.1); }
+        .note-box.danger { background: rgba(248, 113, 113, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="width: 100px;"></div>
+            <div class="header-title">
+                <h1>Retirement Planning Dashboard</h1>
+                <p class="subtitle">Mike & Travis | Based on 2025 Financial Data</p>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+        </div>
+
+        <!-- Retirement Status Indicator -->
+        <div class="status-banner" id="statusBanner">
+            <div class="status-icon" id="statusIcon">✓</div>
+            <div class="status-content">
+                <div class="status-title" id="statusTitle">On Track for Retirement</div>
+                <div class="status-detail" id="statusDetail">Income exceeds expenses by $12,440/year when both retired</div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-label">Current Portfolio</div>
+                <div class="card-value blue">$339,572</div>
+                <div class="card-sub">All accounts + PERS IAP</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Annual Expenses</div>
+                <div class="card-value yellow">$113,598</div>
+                <div class="card-sub">2025 spending baseline</div>
+            </div>
+            <div class="card">
+                <div class="card-label">PERS Pension</div>
+                <div class="card-value green" id="pensionPreview">$74,170/yr</div>
+                <div class="card-sub" id="pensionSubtext">At Travis's retirement</div>
+                <div class="card-sub" id="pensionReduction" style="color: #f87171;"></div>
+            </div>
+            <div class="card">
+                <div class="card-label">Total Retirement Income</div>
+                <div class="card-value purple" id="totalIncomePreview">$181,756/yr</div>
+                <div class="card-sub">Pension + Portfolio + SS + Rental</div>
+            </div>
+            <div class="card">
+                <div class="card-label">vs Expenses</div>
+                <div class="card-value green" id="gapValue">+$12,440</div>
+                <div class="card-sub" id="gapSubtext">Surplus at retirement</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Rental Income (50%)</div>
+                <div class="card-value orange" id="rentalIncomePreview">$0/yr</div>
+                <div class="card-sub" id="rentalIncomeSubtext">Current net (2 properties)</div>
+            </div>
+        </div>
+
+        <!-- Retirement Age Controls -->
+        <div class="collapsible-section" id="section-retirement-ages">
+            <div class="collapsible-header" onclick="toggleSection('retirement-ages')">
+                <h3>👥 Retirement Ages & Contributions</h3>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Mike's Retirement Age</span>
+                        <span class="info-tip">?<span class="tooltip">When Mike stops working. Earlier retirement means more years in retirement but less time to save. Mike doesn't have a pension, so portfolio income is key.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="mikeRetireAge" min="50" max="67" step="1" value="55">
+                        <span class="unit">years old</span>
+                    </div>
+                    <div class="helper-text">
+                        Currently 44 → retires in <span id="mikeYearsToRetire">11</span> years (year <span id="mikeRetireYear">2037</span>)
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Travis's Retirement Age</span>
+                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service. Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="travisRetireAge" min="50" max="67" step="1" value="55">
+                        <span class="unit">years old</span>
+                    </div>
+                    <div class="helper-text">
+                        Currently 36 → retires in <span id="travisYearsToRetire">19</span> years (year <span id="travisRetireYear">2045</span>)
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">💵 Annual Contributions</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Mike's Annual Contributions</span>
+                    </div>
+                    <div class="number-input-group">
+                        <span class="currency-prefix">$</span>
+                        <input type="number" id="mikeContrib" class="contrib-input mike-border" min="0" max="100000" step="500" value="19560">
+                        <span class="input-suffix">/year</span>
+                    </div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px;">
+                        403B + Roth IRA + 401K
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Travis's Annual Contributions</span>
+                    </div>
+                    <div class="number-input-group">
+                        <span class="currency-prefix">$</span>
+                        <input type="number" id="travisContrib" class="contrib-input travis-border" min="0" max="100000" step="500" value="31100">
+                        <span class="input-suffix">/year</span>
+                    </div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px;">
+                        457B + Voya + Sinclair + Roth + PERS IAP
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">📅 Planned Contribution Changes <span style="font-size:0.7rem;color:var(--text-muted);">(optional)</span></div>
+            <div class="note-box info" style="margin-bottom:15px;">
+                <strong>How this works:</strong> Enter an annual increase (or decrease) for a specific year.
+                The change is added to their current contribution at that time, and then continues
+                growing by the "Annual Contribution Growth %" rate each year after.
+                <br><br>
+                <strong>Example:</strong> Mike contributes $19,560/yr now. In 2030, he pays off his car and can add $500/mo more.
+                Enter: Mike, 2030, +$6,000. From 2030 onward, his contributions become ~$25,560 and grow by 2%/yr.
+            </div>
+            <div class="changes-table-container">
+                <div id="changesTableContainer">
+                    <div class="empty-changes" id="emptyChangesMsg">No planned changes. Click "Add Change" to model a future adjustment.</div>
+                    <table class="changes-table" id="changesTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Year</th>
+                                <th>Annual +/- Amount</th>
+                                <th>Note (optional)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="changesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 15px; display: flex; align-items: center;">
+                    <button class="btn-add" id="addChangeBtn" onclick="addContributionChange()">
+                        <span>+</span> Add Change
+                    </button>
+                    <span class="changes-count" id="changesCount">0 of 5 changes</span>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">📈 Investment Assumptions</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Expected Annual Return</span>
+                        <span class="info-tip">?<span class="tooltip">Pre-tax, pre-inflation return on the portfolio. Historical stock average is ~10%, but a 6-7% assumption is more conservative for planning. Higher returns look better but add risk.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="returnRate" min="3" max="10" step="0.5" value="6">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Inflation Rate</span>
+                        <span class="info-tip">?<span class="tooltip">Expected annual increase in cost of living. 2-3% is typical. Higher inflation erodes purchasing power—expenses will double roughly every 24 years at 3%.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="inflationRate" min="1" max="5" step="0.5" value="3">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Withdrawal Rate</span>
+                        <span class="info-tip">?<span class="tooltip">The "safe withdrawal rate" from the portfolio. The 4% rule is traditional, but 3-3.5% is more conservative for early retirees. Lower rates = portfolio lasts longer but less annual income.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="withdrawalRate" min="2.5" max="5" step="0.25" value="3.5">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Annual Contribution Growth</span>
+                        <span class="info-tip">?<span class="tooltip">Each year, contributions increase by this %. This models raises or automatic increases. If you add a "Planned Change" above, that new amount becomes the base, and this growth rate then applies to it going forward.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="contribIncrease" min="0" max="5" step="0.5" value="2">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">💰 Retirement Expenses & Income</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Expense Reduction in Retirement</span>
+                        <span class="info-tip">?<span class="tooltip">Many expenses drop in retirement: no commuting, work clothes, or payroll taxes. 10-20% reduction is typical. Don't over-estimate—healthcare often increases.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="expenseReduction" min="0" max="40" step="5" value="15">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Salary Growth (PERS FAS)</span>
+                        <span class="info-tip">?<span class="tooltip">Travis's expected annual salary increases. This affects the "Final Average Salary" used in PERS pension calculation. Higher growth = higher eventual pension.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="salaryGrowth" min="0" max="5" step="0.5" value="2">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Pre-Medicare Healthcare (per person)</span>
+                        <span class="info-tip">?<span class="tooltip">Annual cost for health insurance before age 65 (Medicare eligibility). ACA marketplace plans can be $12,000-20,000/person. After 65, this drops significantly.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <span style="color:var(--text-muted);">$</span>
+                        <input type="number" id="healthcareCost" min="0" max="30000" step="1000" value="15000">
+                        <span class="unit">/year each</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>One-Time Expenses (total)</span>
+                        <span class="info-tip">?<span class="tooltip">Big early retirement purchases: new car, home repairs, travel. Deducted from portfolio in first retirement year. Be conservative—early retirees often underestimate.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <span style="color:var(--text-muted);">$</span>
+                        <input type="number" id="oneTimeExpenses" min="0" max="200000" step="10000" value="50000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">🏛️ Social Security</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Mike's SS (age 67, monthly)</span>
+                        <span class="info-tip">?<span class="tooltip">Estimated Social Security at full retirement age (67). Check ssa.gov for estimates. This income starts at 67 regardless of when you retire early.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <span style="color:var(--text-muted);">$</span>
+                        <input type="number" id="mikeSs" min="0" max="4000" step="100" value="2500">
+                        <span class="unit">/mo</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Travis's SS (age 67, monthly)</span>
+                        <span class="info-tip">?<span class="tooltip">Travis's expected Social Security benefit at age 67. Higher earners typically get $3,000-4,500/month. Combined with PERS, this is a significant income boost.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <span style="color:var(--text-muted);">$</span>
+                        <input type="number" id="travisSs" min="0" max="4500" step="100" value="3500">
+                        <span class="unit">/mo</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Rental Properties Section -->
+        <div class="collapsible-section" id="section-rentals">
+            <div class="collapsible-header" onclick="toggleSection('rentals')">
+                <h3>🏠 Rental Properties <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+            <div class="controls-subtitle" style="margin-top:0;border-top:none;padding-top:0;">📊 Rental Assumptions</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Rent Growth Rate</span>
+                        <span class="info-tip">?<span class="tooltip">Annual increase in rent. Historical average is 3-4%. The rentals just increased—Danebo to $2,095. Growth compounds significantly over time.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="rentGrowth" min="0" max="7" step="0.5" value="3.5">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Vacancy Rate</span>
+                        <span class="info-tip">?<span class="tooltip">Expected percentage of time the property is empty. 5-8% is typical for good markets. Higher vacancy = less income. The Eugene market has been strong.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="vacancyRate" min="0" max="20" step="1" value="8">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Property Appreciation</span>
+                        <span class="info-tip">?<span class="tooltip">Annual increase in property value. Used for sale proceeds calculations. 3% is conservative; Eugene has seen higher historically.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="propertyAppreciation" min="0" max="6" step="0.5" value="3">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Maintenance (% of value/yr)</span>
+                        <span class="info-tip">?<span class="tooltip">Budget for repairs and upkeep. 1% of property value annually is standard. Older homes may need more. This reduces net rental income.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="maintenanceRate" min="0.5" max="3" step="0.25" value="1">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Property Management Fee</span>
+                        <span class="info-tip">?<span class="tooltip">Fee paid to property manager (% of rent). 8-10% is typical. Set to 0% if self-managing. Professional management frees up time but costs money.</span></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="propMgmtFee" min="0" max="12" step="1" value="8">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">🏘️ Property Details & Options</div>
+            <div class="rental-cards">
+                <!-- Danebo Property Card -->
+                <div class="rental-card">
+                    <div class="rental-card-header">
+                        <div>
+                            <div class="rental-card-title">🏡 Danebo</div>
+                            <div class="rental-card-address">526 N Danebo Ave, Eugene</div>
+                        </div>
+                        <span class="rental-status active" id="daneboStatus">Active</span>
+                    </div>
+                    <div class="rental-stats">
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Monthly Rent</span>
+                            <span class="rental-stat-value">$2,095</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Market Value</span>
+                            <span class="rental-stat-value" id="daneboValue">$409,900</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Household 50% Mortgage</span>
+                            <span class="rental-stat-value">$739/mo</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Payoff Year</span>
+                            <span class="rental-stat-value" id="daneboPayoff">2050</span>
+                        </div>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>Extra Principal:</label>
+                        <span style="color:var(--text-secondary);">$</span>
+                        <input type="number" id="daneboExtraPrincipal" min="0" max="2000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>
+                            <input type="checkbox" id="daneboSell" onchange="toggleSellOptions('danebo')">
+                            Sell this property
+                        </label>
+                    </div>
+                    <div class="sell-options hidden" id="daneboSellOptions">
+                        <label>Sell in year: </label>
+                        <input type="number" id="daneboSellYear" min="2026" max="2060" value="2035">
+                        <div style="margin-top:5px;color:#f87171;" id="daneboCapGains"></div>
+                        <div style="margin-top:10px;padding:8px;background:rgba(79,172,254,0.1);border-radius:6px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;">
+                                <input type="checkbox" id="daneboInvestProceeds" checked onchange="update()">
+                                Invest proceeds into portfolio
+                            </label>
+                            <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:0.8rem;">
+                                <span style="color:var(--text-secondary);">Amount:</span>
+                                <span style="color:var(--text-muted);">$</span>
+                                <input type="number" id="daneboInvestAmount" min="0" max="500000" step="5000" value="0" style="width:90px;" onchange="update()" oninput="update()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rental-net-income">
+                        <span style="font-size:0.75rem;color:var(--text-secondary);">Household Annual Net Income:</span>
+                        <span class="rental-stat-value green" id="daneboNetIncome">$0</span>
+                    </div>
+                </div>
+
+                <!-- Century Property Card -->
+                <div class="rental-card">
+                    <div class="rental-card-header">
+                        <div>
+                            <div class="rental-card-title">🏡 Century</div>
+                            <div class="rental-card-address">3703 Century Dr, Eugene</div>
+                        </div>
+                        <span class="rental-status active" id="centuryStatus">Active</span>
+                    </div>
+                    <div class="rental-stats">
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Monthly Rent</span>
+                            <span class="rental-stat-value">$2,195</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Market Value</span>
+                            <span class="rental-stat-value" id="centuryValue">$387,300</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Household 50% Mortgage</span>
+                            <span class="rental-stat-value">$720/mo</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Payoff Year</span>
+                            <span class="rental-stat-value" id="centuryPayoff">~2044</span>
+                        </div>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>Extra Principal:</label>
+                        <span style="color:var(--text-secondary);">$</span>
+                        <input type="number" id="centuryExtraPrincipal" min="0" max="2000" step="50" value="62">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>
+                            <input type="checkbox" id="centurySell" onchange="toggleSellOptions('century')">
+                            Sell this property
+                        </label>
+                    </div>
+                    <div class="sell-options hidden" id="centurySellOptions">
+                        <label>Sell in year: </label>
+                        <input type="number" id="centurySellYear" min="2026" max="2060" value="2035">
+                        <div style="margin-top:5px;color:#f87171;" id="centuryCapGains"></div>
+                        <div style="margin-top:10px;padding:8px;background:rgba(79,172,254,0.1);border-radius:6px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;">
+                                <input type="checkbox" id="centuryInvestProceeds" checked onchange="update()">
+                                Invest proceeds into portfolio
+                            </label>
+                            <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:0.8rem;">
+                                <span style="color:var(--text-secondary);">Amount:</span>
+                                <span style="color:var(--text-muted);">$</span>
+                                <input type="number" id="centuryInvestAmount" min="0" max="500000" step="5000" value="0" style="width:90px;" onchange="update()" oninput="update()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rental-net-income">
+                        <span style="font-size:0.75rem;color:var(--text-secondary);">Household Annual Net Income:</span>
+                        <span class="rental-stat-value green" id="centuryNetIncome">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note-box warning">
+                <strong>💡 Note:</strong> Danebo has $228/mo furnace loan (ends 2029). Net income calculations include mortgage P+I+escrow, management fees, vacancy, and maintenance.
+                After mortgage payoff, net income jumps significantly.
+            </div>
+            </div>
+        </div>
+
+        <!-- Primary Residence Section -->
+        <div class="collapsible-section" id="section-home">
+            <div class="collapsible-header" onclick="toggleSection('home')">
+                <h3>🏡 Primary Residence <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+
+            <div class="rental-cards">
+                <div class="rental-card" style="border-left: 3px solid #60a5fa;">
+                    <div class="rental-card-header">
+                        <div>
+                            <div class="rental-card-title" style="color:#60a5fa;">🏠 Timberline Dr</div>
+                            <div class="rental-card-address">2965 Timberline Dr, Eugene</div>
+                        </div>
+                        <span class="rental-status active">Primary Home</span>
+                    </div>
+                    <div class="rental-stats">
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Est. Value</span>
+                            <span class="rental-stat-value" id="homeValue">$481,000</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Household 50% Equity</span>
+                            <span class="rental-stat-value green" id="homeEquity">$119,828</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Household 50% Payment</span>
+                            <span class="rental-stat-value">$864/mo</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Payoff Year</span>
+                            <span class="rental-stat-value" id="homePayoff">~2050</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Interest Rate</span>
+                            <span class="rental-stat-value green">2.75%</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">After Payoff</span>
+                            <span class="rental-stat-value" id="homePostPayoff">$286/mo</span>
+                        </div>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>Extra Principal:</label>
+                        <span style="color:var(--text-secondary);">$</span>
+                        <input type="number" id="homeExtraPrincipal" min="0" max="2000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                    </div>
+                    <div class="rental-input-row">
+                        <label>
+                            <input type="checkbox" id="homeSell" onchange="toggleSellOptions('home')">
+                            Sell & downsize
+                        </label>
+                    </div>
+                    <div class="sell-options hidden" id="homeSellOptions">
+                        <label>Sell in year: </label>
+                        <input type="number" id="homeSellYear" min="2026" max="2060" value="2035">
+                        <div style="margin-top:8px;color:#4ade80;" id="homeProceeds"></div>
+                        <div style="margin-top:12px;padding:10px;background:rgba(79,172,254,0.1);border-radius:6px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;">
+                                <input type="checkbox" id="homeInvestProceeds" checked onchange="update()">
+                                Invest proceeds into portfolio
+                            </label>
+                            <div style="margin-top:8px;display:flex;align-items:center;gap:8px;" id="homeInvestAmountRow">
+                                <span style="font-size:0.8rem;color:var(--text-secondary);">Amount to invest:</span>
+                                <span style="color:var(--text-muted);">$</span>
+                                <input type="number" id="homeInvestAmount" min="0" max="1000000" step="10000" value="0" style="width:100px;" onchange="update()" oninput="update()">
+                            </div>
+                        </div>
+                        <div style="margin-top:4px;font-size:0.7rem;color:var(--text-muted);">
+                            💡 Primary residence: $500K capital gains exclusion for married couples (likely $0 tax).
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;padding:10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.75rem;">
+                        <strong>💡 2.75% rate is excellent!</strong> Below inflation, so accelerating payoff may not be the best use of capital.
+                        Mortgage payment is included in the expense baseline.
+                    </div>
+                </div>
+
+                <div class="rental-card" style="background:rgba(96,165,250,0.05);">
+                    <div style="font-size:0.9rem;font-weight:600;color:#60a5fa;margin-bottom:15px;">📊 All Properties Summary</div>
+                    <div class="rental-stats" style="grid-template-columns: 1fr;">
+                        <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Total Real Estate Value</span>
+                            <span class="rental-stat-value" id="totalRealEstateValue">$1,278,200</span>
+                        </div>
+                        <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Household 50% Equity</span>
+                            <span class="rental-stat-value green" id="totalEquity">$329,271</span>
+                        </div>
+                        <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Household Monthly Mortgage Payments</span>
+                            <span class="rental-stat-value yellow" id="totalMortgages">$2,323/mo</span>
+                        </div>
+                        <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;">
+                            <span class="rental-stat-label" style="font-size:0.8rem;">After All Paid Off</span>
+                            <span class="rental-stat-value green" id="postPayoffCosts">~$572/mo</span>
+                        </div>
+                    </div>
+                    <div class="helper-text">
+                        <strong>Impact on Retirement:</strong> When mortgages are paid off, household expenses drop significantly. The model factors this into expense projections automatically.
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="results-section">
+            <div class="result-card">
+                <div class="result-title" style="color: #4facfe;">📊 Household Retirement Scenario</div>
+                <table class="scenarios-table">
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Years</th>
+                            <th>Portfolio</th>
+                            <th>Income Sources</th>
+                            <th>vs Expenses</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scenariosBody">
+                    </tbody>
+                </table>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <strong>How to read this:</strong> Each phase shows what happens as Mike and Travis retire at different times.
+                    Contributions stop when each person retires. Social Security kicks in at 67.
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="result-title" style="color: #4ade80;">📈 Portfolio Growth Over Time</div>
+                <div class="chart-container">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 10px;">
+                    Hover/tap points to see both ages. Vertical lines show retirement dates.
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Breakdown -->
+        <div class="income-breakdown">
+            <div class="result-title" style="color: #fbbf24;">💵 Income Breakdown <span id="incomeBreakdownSubtitle" style="font-size:0.8rem;color:var(--text-secondary);">(when both retired)</span></div>
+            <div id="incomeBarContainer">
+                <div class="income-bar" id="incomeBar"></div>
+            </div>
+            <div class="income-legend" id="incomeLegend"></div>
+        </div>
+
+        <!-- Person Breakdown -->
+        <div class="person-section">
+            <div class="person-card">
+                <div class="person-name mike">👤 Mike (Age 44)</div>
+                <div class="account-list">
+                    <div class="account-item">
+                        <span class="account-name">Peacehealth 403B</span>
+                        <span class="account-value">$211,300</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Roth IRA</span>
+                        <span class="account-value">$7,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">401K (Current)</span>
+                        <span class="account-value">$25,408</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Annual Contributions</span>
+                        <span class="account-value green" id="mikeContribDisplay">$19,560</span>
+                    </div>
+                    <div class="account-item" style="font-weight: 600;">
+                        <span class="account-name">Total</span>
+                        <span class="account-value blue">$243,708</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.85rem; color: #a78bfa; font-weight: 600;">📋 No Pension</div>
+                    <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">
+                        Relies on 401k/403b accounts + Social Security at 67
+                    </div>
+                </div>
+            </div>
+            <div class="person-card">
+                <div class="person-name travis">👤 Travis (Age 36)</div>
+                <div class="account-list">
+                    <div class="account-item">
+                        <span class="account-name">457B (LRAPA)</span>
+                        <span class="account-value">$29,618</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Voya Pension</span>
+                        <span class="account-value">$23,308</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Sinclair</span>
+                        <span class="account-value">$17,938</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Roth IRA</span>
+                        <span class="account-value">$7,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">PERS IAP</span>
+                        <span class="account-value">$18,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Annual Contributions</span>
+                        <span class="account-value green" id="travisContribDisplay">$31,100</span>
+                    </div>
+                    <div class="account-item" style="font-weight: 600;">
+                        <span class="account-name">Total Accounts</span>
+                        <span class="account-value green">$95,864</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.85rem; color: #fbbf24; font-weight: 600;">🏛️ Oregon PERS Pension (OPSRP)</div>
+                    <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">
+                        Formula: 1.5% × years × final avg salary<br>
+                        Started: Oct 2022 | Vesting: Oct 2027<br>
+                        Current salary: $152,000
+                    </div>
+                    <div style="font-size: 0.7rem; color: #f87171; margin-top: 8px; padding: 8px; background: rgba(248,113,113,0.1); border-radius: 6px;">
+                        <strong>Early Retirement Penalty:</strong><br>
+                        Normal age: 65 (or 58 w/ 30 yrs)<br>
+                        Earliest: 55 (~61% reduction)<br>
+                        Age 60: ~40% reduction
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Data sourced from Retirement Calc.xlsx and Combined_Credit_Cards_2025_All.xlsx | Dashboard generated January 2026
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? null : 'dark';
+
+            if (newTheme) {
+                html.setAttribute('data-theme', 'dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeLabel').textContent = 'Light';
+            } else {
+                html.removeAttribute('data-theme');
+                document.getElementById('themeIcon').textContent = '🌙';
+                document.getElementById('themeLabel').textContent = 'Dark';
+            }
+
+            // Save preference
+            localStorage.setItem('theme', newTheme || 'light');
+
+            // Update chart colors if chart exists
+            if (chart) {
+                updateChartColors();
+            }
+        }
+
+        // Load saved theme on page load
+        function loadTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeLabel').textContent = 'Light';
+            }
+        }
+
+        // Update chart colors for theme
+        function updateChartColors() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const textColor = isDark ? '#888' : '#666';
+
+            if (chart && chart.options) {
+                chart.options.scales.x.grid.color = gridColor;
+                chart.options.scales.y.grid.color = gridColor;
+                chart.options.scales.x.ticks.color = textColor;
+                chart.options.scales.y.ticks.color = textColor;
+                chart.update('none');
+            }
+        }
+
+        // Collapsible section toggle
+        function toggleSection(sectionId) {
+            const section = document.getElementById('section-' + sectionId);
+            if (section) {
+                section.classList.toggle('collapsed');
+                // Save preference
+                const collapsed = section.classList.contains('collapsed');
+                localStorage.setItem('section-' + sectionId, collapsed ? 'collapsed' : 'expanded');
+            }
+        }
+
+        // Load saved section states
+        function loadSectionStates() {
+            const sections = ['retirement-ages', 'rentals', 'home'];
+            sections.forEach(id => {
+                const saved = localStorage.getItem('section-' + id);
+                const section = document.getElementById('section-' + id);
+                if (section && saved === 'collapsed') {
+                    section.classList.add('collapsed');
+                }
+            });
+        }
+
+        // Base financial data
+        const baseData = {
+            currentPortfolio: 321572 + 18000,
+            annualExpenses: 113598,
+            mikeAge: 44,
+            travisAge: 36,
+            mikeContributions: 19560,
+            travisContributions: 31100,
+            currentYear: 2026,
+            // PERS parameters
+            persStartYear: 2022.75,
+            currentSalary: 152000,
+            persMultiplier: 0.015,
+            // Ownership share of rentals (50/50 with Mike)
+            rentalOwnership: 0.50,
+            // Rental Properties
+            rentals: {
+                danebo: {
+                    name: "Danebo",
+                    address: "526 N Danebo Ave",
+                    currentRent: 2095,           // Monthly (just increased Dec 2025)
+                    marketValue: 409900,
+                    purchasePrice: 195000,
+                    yearPurchased: 2015,
+                    mortgageBalance: 204742,     // Full balance
+                    mortgagePayment: 1478.65,    // Monthly P+I+escrow (full)
+                    mortgageRate: 0.0375,
+                    mortgagePayoff: 2050,        // Standard payoff year
+                    propertyTax: 3359,           // Annual
+                    insurance: 1464,             // Annual
+                    extraPrincipal: 0,           // Monthly extra payment
+                    furnaceLoan: 228,            // Monthly furnace payment
+                    furnaceLoanEnd: 2029         // When furnace loan ends
+                },
+                century: {
+                    name: "Century",
+                    address: "3703 Century Dr",
+                    currentRent: 2195,           // Monthly
+                    marketValue: 387300,
+                    purchasePrice: 224000,
+                    yearPurchased: 2017,
+                    mortgageBalance: 173572,     // Full balance
+                    mortgagePayment: 1314.49,    // Monthly P+I+escrow (full)
+                    mortgageRate: 0.0375,
+                    mortgagePayoff: 2050,        // Standard payoff (2044 with current extra)
+                    propertyTax: 3297,           // Annual
+                    insurance: 1223,             // Annual
+                    extraPrincipal: 125,         // Monthly extra payment (current)
+                    furnaceLoan: 0,
+                    furnaceLoanEnd: null
+                }
+            },
+            // Primary Residence (50/50 with Mike)
+            primaryResidence: {
+                name: "Timberline",
+                address: "2965 Timberline Dr, Eugene",
+                purchasePrice: 351400,
+                currentValue: 481000,
+                mortgageBalance: 241345,         // Full balance as of Feb 2026
+                mortgagePayment: 1728.51,        // Monthly total (P+I+escrow+shortage)
+                mortgagePI: 1147.65,             // Just P&I portion
+                mortgageRate: 0.0275,            // 2.75% - excellent rate!
+                mortgagePayoff: 2050,            // Standard payoff ~July 2050
+                propertyTax: 6094,               // Annual (2025)
+                insurance: 777,                  // Annual (2025)
+                escrowShortage: 201.78,          // Being spread through Apr 2026
+                // Note: mortgage is likely already included in the $113,598 annual expenses
+                includedInExpenses: true
+            }
+        };
+
+        let chart = null;
+
+        // Contribution changes array (max 5)
+        const MAX_CHANGES = 5;
+        let contributionChanges = [];
+
+        function addContributionChange() {
+            if (contributionChanges.length >= MAX_CHANGES) return;
+
+            contributionChanges.push({
+                id: Date.now(),
+                person: 'mike',
+                year: baseData.currentYear + 2,
+                amount: 6000,  // Default to +$6,000/yr (~$500/mo increase)
+                note: ''
+            });
+
+            renderChangesTable();
+            update();
+        }
+
+        function removeContributionChange(id) {
+            contributionChanges = contributionChanges.filter(c => c.id !== id);
+            renderChangesTable();
+            update();
+        }
+
+        function updateContributionChange(id, field, value) {
+            const change = contributionChanges.find(c => c.id === id);
+            if (change) {
+                if (field === 'year') {
+                    change[field] = parseInt(value) || baseData.currentYear;
+                } else if (field === 'amount') {
+                    change[field] = parseFloat(value) || 0;
+                } else {
+                    change[field] = value;
+                }
+                update();
+            }
+        }
+
+        function renderChangesTable() {
+            const tbody = document.getElementById('changesTableBody');
+            const table = document.getElementById('changesTable');
+            const emptyMsg = document.getElementById('emptyChangesMsg');
+            const countEl = document.getElementById('changesCount');
+            const addBtn = document.getElementById('addChangeBtn');
+
+            // Update count display
+            countEl.textContent = `${contributionChanges.length} of ${MAX_CHANGES} changes`;
+
+            // Enable/disable add button
+            addBtn.disabled = contributionChanges.length >= MAX_CHANGES;
+
+            if (contributionChanges.length === 0) {
+                table.style.display = 'none';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            emptyMsg.style.display = 'none';
+
+            // Sort by year
+            const sorted = [...contributionChanges].sort((a, b) => a.year - b.year);
+
+            tbody.innerHTML = sorted.map(change => {
+                const personClass = change.person === 'mike' ? 'person-mike' : 'person-travis';
+                const personName = change.person === 'mike' ? 'Mike' : 'Travis';
+
+                return `
+                    <tr>
+                        <td>
+                            <select onchange="updateContributionChange(${change.id}, 'person', this.value)">
+                                <option value="mike" ${change.person === 'mike' ? 'selected' : ''}>Mike</option>
+                                <option value="travis" ${change.person === 'travis' ? 'selected' : ''}>Travis</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" value="${change.year}" min="2026" max="2060"
+                                   onchange="updateContributionChange(${change.id}, 'year', this.value)"
+                                   oninput="updateContributionChange(${change.id}, 'year', this.value)">
+                        </td>
+                        <td>
+                            <span style="color:var(--text-secondary);">+$</span>
+                            <input type="number" value="${change.amount}" min="-50000" max="100000" step="500"
+                                   onchange="updateContributionChange(${change.id}, 'amount', this.value)"
+                                   oninput="updateContributionChange(${change.id}, 'amount', this.value)"
+                                   style="width:70px;">
+                            <span style="color:var(--text-muted);font-size:0.7rem;">/yr</span>
+                        </td>
+                        <td>
+                            <input type="text" value="${change.note}" placeholder="e.g., Car paid off"
+                                   style="width:120px;"
+                                   onchange="updateContributionChange(${change.id}, 'note', this.value)">
+                        </td>
+                        <td>
+                            <button class="btn-remove" onclick="removeContributionChange(${change.id})">✕</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Toggle sell options visibility
+        function toggleSellOptions(property) {
+            const checkbox = document.getElementById(property + 'Sell');
+            const options = document.getElementById(property + 'SellOptions');
+            const status = document.getElementById(property + 'Status');
+
+            if (checkbox.checked) {
+                options.classList.remove('hidden');
+                if (status) {
+                    status.textContent = 'Will Sell';
+                    status.classList.remove('active');
+                    status.classList.add('sold');
+                }
+            } else {
+                options.classList.add('hidden');
+                if (status) {
+                    status.textContent = property === 'home' ? 'Primary Home' : 'Active';
+                    status.classList.remove('sold');
+                    status.classList.add('active');
+                }
+            }
+            update();
+        }
+
+        // Calculate mortgage payoff year with extra principal
+        function calculateMortgagePayoff(balance, monthlyPI, rate, extraPrincipal, currentYear) {
+            if (balance <= 0) return currentYear;
+
+            let remaining = balance;
+            const monthlyRate = rate / 12;
+            let months = 0;
+            const maxMonths = 360; // 30 years max
+
+            while (remaining > 0 && months < maxMonths) {
+                const interest = remaining * monthlyRate;
+                const principalPaid = (monthlyPI - interest) + extraPrincipal;
+                remaining -= principalPaid;
+                months++;
+            }
+
+            return currentYear + Math.ceil(months / 12);
+        }
+
+        // Calculate rental income for a specific year
+        function calculateRentalIncomeForYear(year, inputs) {
+            const ownership = baseData.rentalOwnership;
+            let totalNetIncome = 0;
+            let daneboIncome = 0;
+            let centuryIncome = 0;
+            let saleProceeds = 0;
+
+            const yearsFromNow = year - baseData.currentYear;
+
+            // Process each property
+            ['danebo', 'century'].forEach(propKey => {
+                const prop = baseData.rentals[propKey];
+                const sellChecked = inputs[propKey + 'Sell'];
+                const sellYear = inputs[propKey + 'SellYear'];
+                const extraPrincipal = inputs[propKey + 'ExtraPrincipal'];
+
+                // Check if property was sold before this year
+                if (sellChecked && year >= sellYear) {
+                    // Property sold - add sale proceeds in the sell year only
+                    if (year === sellYear) {
+                        const appreciatedValue = prop.marketValue * Math.pow(1 + inputs.propertyAppreciation, sellYear - baseData.currentYear);
+                        const gain = appreciatedValue - prop.purchasePrice;
+                        const capGainsTax = gain * 0.15; // 15% capital gains
+                        saleProceeds += (appreciatedValue - capGainsTax) * ownership;
+                    }
+                    return; // No rental income from sold property
+                }
+
+                // Calculate payoff year with extra principal
+                const fullExtraPrincipal = extraPrincipal * 2; // Convert 50% share to full
+                const payoffYear = calculateMortgagePayoff(
+                    prop.mortgageBalance,
+                    prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12, // Just P&I
+                    prop.mortgageRate,
+                    prop.extraPrincipal + fullExtraPrincipal,
+                    baseData.currentYear
+                );
+
+                // Rent with growth
+                const annualRent = prop.currentRent * 12 * Math.pow(1 + inputs.rentGrowth, yearsFromNow);
+
+                // Effective rent after vacancy
+                const effectiveRent = annualRent * (1 - inputs.vacancyRate);
+
+                // Property value with appreciation
+                const currentValue = prop.marketValue * Math.pow(1 + inputs.propertyAppreciation, yearsFromNow);
+
+                // Expenses
+                const management = effectiveRent * inputs.propMgmtFee;
+                const maintenance = currentValue * inputs.maintenanceRate;
+                const taxes = prop.propertyTax * Math.pow(1.02, yearsFromNow); // 2% annual increase
+                const insurance = prop.insurance * Math.pow(1.02, yearsFromNow);
+
+                // Mortgage (0 if paid off)
+                let mortgageCost = 0;
+                if (year < payoffYear) {
+                    mortgageCost = prop.mortgagePayment * 12;
+                }
+
+                // Furnace loan (Danebo only)
+                let furnaceCost = 0;
+                if (prop.furnaceLoan > 0 && prop.furnaceLoanEnd && year < prop.furnaceLoanEnd) {
+                    furnaceCost = prop.furnaceLoan * 12;
+                }
+
+                // Net operating income (full property)
+                const noi = effectiveRent - management - maintenance - taxes - insurance - mortgageCost - furnaceCost;
+
+                // Your 50% share
+                const netIncome = noi * ownership;
+
+                if (propKey === 'danebo') {
+                    daneboIncome = netIncome;
+                } else {
+                    centuryIncome = netIncome;
+                }
+
+                totalNetIncome += netIncome;
+            });
+
+            return {
+                totalNetIncome,
+                daneboIncome,
+                centuryIncome,
+                saleProceeds
+            };
+        }
+
+        // Get rental-specific inputs
+        function getRentalInputValues() {
+            return {
+                rentGrowth: parseFloat(document.getElementById('rentGrowth').value) / 100,
+                vacancyRate: parseFloat(document.getElementById('vacancyRate').value) / 100,
+                propertyAppreciation: parseFloat(document.getElementById('propertyAppreciation').value) / 100,
+                maintenanceRate: parseFloat(document.getElementById('maintenanceRate').value) / 100,
+                propMgmtFee: parseFloat(document.getElementById('propMgmtFee').value) / 100,
+                daneboExtraPrincipal: parseFloat(document.getElementById('daneboExtraPrincipal').value) || 0,
+                centuryExtraPrincipal: parseFloat(document.getElementById('centuryExtraPrincipal').value) || 0,
+                daneboSell: document.getElementById('daneboSell').checked,
+                daneboSellYear: parseInt(document.getElementById('daneboSellYear').value) || 2035,
+                daneboInvestProceeds: document.getElementById('daneboInvestProceeds').checked,
+                daneboInvestAmount: parseFloat(document.getElementById('daneboInvestAmount').value) || 0,
+                centurySell: document.getElementById('centurySell').checked,
+                centurySellYear: parseInt(document.getElementById('centurySellYear').value) || 2035,
+                centuryInvestProceeds: document.getElementById('centuryInvestProceeds').checked,
+                centuryInvestAmount: parseFloat(document.getElementById('centuryInvestAmount').value) || 0,
+                homeSell: document.getElementById('homeSell').checked,
+                homeSellYear: parseInt(document.getElementById('homeSellYear').value) || 2035,
+                homeInvestProceeds: document.getElementById('homeInvestProceeds').checked,
+                homeInvestAmount: parseFloat(document.getElementById('homeInvestAmount').value) || 0
+            };
+        }
+
+        // Update rental displays
+        function updateRentalDisplays() {
+            const r = getRentalInputValues();
+
+            // Calculate payoff years
+            const daneboPayoff = calculateMortgagePayoff(
+                baseData.rentals.danebo.mortgageBalance,
+                baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
+                baseData.rentals.danebo.mortgageRate,
+                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                baseData.currentYear
+            );
+            const centuryPayoff = calculateMortgagePayoff(
+                baseData.rentals.century.mortgageBalance,
+                baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
+                baseData.rentals.century.mortgageRate,
+                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                baseData.currentYear
+            );
+
+            document.getElementById('daneboPayoff').textContent = r.daneboSell ? 'Selling ' + r.daneboSellYear : daneboPayoff;
+            document.getElementById('centuryPayoff').textContent = r.centurySell ? 'Selling ' + r.centurySellYear : '~' + centuryPayoff;
+
+            // Calculate current year net income
+            const currentIncome = calculateRentalIncomeForYear(baseData.currentYear, r);
+            document.getElementById('daneboNetIncome').textContent = formatCurrency(currentIncome.daneboIncome);
+            document.getElementById('centuryNetIncome').textContent = formatCurrency(currentIncome.centuryIncome);
+
+            // Color code based on positive/negative
+            document.getElementById('daneboNetIncome').className = 'rental-stat-value ' + (currentIncome.daneboIncome >= 0 ? 'green' : 'red');
+            document.getElementById('centuryNetIncome').className = 'rental-stat-value ' + (currentIncome.centuryIncome >= 0 ? 'green' : 'red');
+
+            // Update rental summary card at top
+            document.getElementById('rentalIncomePreview').textContent = formatCurrency(currentIncome.totalNetIncome) + '/yr';
+            document.getElementById('rentalIncomePreview').className = 'card-value ' + (currentIncome.totalNetIncome >= 0 ? 'orange' : 'red');
+
+            // Update property values with appreciation
+            document.getElementById('daneboValue').textContent = formatCurrency(baseData.rentals.danebo.marketValue);
+            document.getElementById('centuryValue').textContent = formatCurrency(baseData.rentals.century.marketValue);
+
+            // Calculate and display capital gains if selling
+            if (r.daneboSell) {
+                const yearsToSell = r.daneboSellYear - baseData.currentYear;
+                const saleValue = baseData.rentals.danebo.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
+                const gain = saleValue - baseData.rentals.danebo.purchasePrice;
+                const tax = gain * 0.15;
+                const netProceeds = (saleValue - tax) * 0.5;
+
+                // Auto-populate invest amount if empty
+                const daneboInvestInput = document.getElementById('daneboInvestAmount');
+                if (!daneboInvestInput.value || parseFloat(daneboInvestInput.value) === 0) {
+                    daneboInvestInput.value = Math.round(netProceeds);
+                }
+
+                let investStatus = '';
+                if (r.daneboInvestProceeds) {
+                    const investAmt = parseFloat(daneboInvestInput.value) || 0;
+                    investStatus = `<br><span style="color:#4facfe;">→ Investing ${formatCurrency(investAmt)} in ${r.daneboSellYear}</span>`;
+                } else {
+                    investStatus = `<br><span style="color:var(--text-muted);">→ Not investing proceeds</span>`;
+                }
+
+                document.getElementById('daneboCapGains').innerHTML =
+                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax * 0.5)}<br>` +
+                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+            }
+
+            if (r.centurySell) {
+                const yearsToSell = r.centurySellYear - baseData.currentYear;
+                const saleValue = baseData.rentals.century.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
+                const gain = saleValue - baseData.rentals.century.purchasePrice;
+                const tax = gain * 0.15;
+                const netProceeds = (saleValue - tax) * 0.5;
+
+                // Auto-populate invest amount if empty
+                const centuryInvestInput = document.getElementById('centuryInvestAmount');
+                if (!centuryInvestInput.value || parseFloat(centuryInvestInput.value) === 0) {
+                    centuryInvestInput.value = Math.round(netProceeds);
+                }
+
+                let investStatus = '';
+                if (r.centuryInvestProceeds) {
+                    const investAmt = parseFloat(centuryInvestInput.value) || 0;
+                    investStatus = `<br><span style="color:#4facfe;">→ Investing ${formatCurrency(investAmt)} in ${r.centurySellYear}</span>`;
+                } else {
+                    investStatus = `<br><span style="color:var(--text-muted);">→ Not investing proceeds</span>`;
+                }
+
+                document.getElementById('centuryCapGains').innerHTML =
+                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax * 0.5)}<br>` +
+                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+            }
+        }
+
+        // Update primary residence displays
+        function updateHomeDisplays() {
+            const homeExtraPrincipal = parseFloat(document.getElementById('homeExtraPrincipal').value) || 0;
+            const r = getRentalInputValues();
+            const ownership = baseData.rentalOwnership;
+            const home = baseData.primaryResidence;
+
+            // Calculate home payoff year with extra principal
+            const fullExtraPrincipal = homeExtraPrincipal * 2;
+            const homePayoff = calculateMortgagePayoff(
+                home.mortgageBalance,
+                home.mortgagePI,
+                home.mortgageRate,
+                fullExtraPrincipal,
+                baseData.currentYear
+            );
+            document.getElementById('homePayoff').textContent = '~' + homePayoff;
+
+            // Home equity (current)
+            const homeEquity = (home.currentValue - home.mortgageBalance) * ownership;
+            document.getElementById('homeEquity').textContent = formatCurrency(homeEquity);
+
+            // Post-payoff monthly cost (just tax + insurance)
+            const postPayoffMonthly = ((home.propertyTax + home.insurance) / 12) * ownership;
+            document.getElementById('homePostPayoff').textContent = formatCurrency(postPayoffMonthly) + '/mo';
+
+            // Calculate home sale proceeds if selling
+            if (r.homeSell) {
+                const yearsToSell = r.homeSellYear - baseData.currentYear;
+                const appreciatedValue = home.currentValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
+
+                // Calculate remaining mortgage at time of sale
+                const monthsToSell = yearsToSell * 12;
+                let remainingMortgage = home.mortgageBalance;
+                const monthlyPI = home.mortgagePI;
+                const monthlyRate = home.mortgageRate / 12;
+                for (let m = 0; m < monthsToSell && remainingMortgage > 0; m++) {
+                    const interest = remainingMortgage * monthlyRate;
+                    const principal = monthlyPI - interest + (fullExtraPrincipal / 12);
+                    remainingMortgage = Math.max(0, remainingMortgage - principal);
+                }
+
+                // Gross proceeds after mortgage payoff
+                const grossProceeds = appreciatedValue - remainingMortgage;
+
+                // Capital gains (with $500K married couple exclusion for primary residence)
+                const gain = appreciatedValue - home.purchasePrice;
+                const taxableGain = Math.max(0, gain - 500000); // $500K exclusion
+                const capGainsTax = taxableGain * 0.15;
+
+                // Net proceeds (household 50% share)
+                const netProceeds = (grossProceeds - capGainsTax) * ownership;
+
+                // Auto-populate invest amount field if it's 0 or empty
+                const homeInvestInput = document.getElementById('homeInvestAmount');
+                if (!homeInvestInput.value || parseFloat(homeInvestInput.value) === 0) {
+                    homeInvestInput.value = Math.round(netProceeds);
+                }
+
+                // Build status text based on invest checkbox
+                let investStatus = '';
+                if (r.homeInvestProceeds) {
+                    const investAmt = parseFloat(homeInvestInput.value) || 0;
+                    investStatus = `<span style="color:#4facfe;">→ Investing ${formatCurrency(investAmt)} into portfolio in ${r.homeSellYear}</span>`;
+                } else {
+                    investStatus = `<span style="color:var(--text-muted);">→ Not investing proceeds (keeping as cash/other use)</span>`;
+                }
+
+                document.getElementById('homeProceeds').innerHTML =
+                    `<strong>Estimated proceeds in ${r.homeSellYear}:</strong><br>` +
+                    `Home value: ${formatCurrency(appreciatedValue)} (${(r.propertyAppreciation*100).toFixed(1)}%/yr appreciation)<br>` +
+                    `Remaining mortgage: ${formatCurrency(remainingMortgage)}<br>` +
+                    `Capital gains tax: ${formatCurrency(capGainsTax)} ${taxableGain === 0 ? '($500K exclusion applies)' : ''}<br>` +
+                    `<strong>Household net proceeds: ${formatCurrency(netProceeds)}</strong><br>` +
+                    investStatus;
+            }
+
+            // Calculate rental payoff years for totals
+            const daneboPayoff = calculateMortgagePayoff(
+                baseData.rentals.danebo.mortgageBalance,
+                baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
+                baseData.rentals.danebo.mortgageRate,
+                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                baseData.currentYear
+            );
+            const centuryPayoff = calculateMortgagePayoff(
+                baseData.rentals.century.mortgageBalance,
+                baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
+                baseData.rentals.century.mortgageRate,
+                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                baseData.currentYear
+            );
+
+            // Total real estate value
+            const totalValue = home.currentValue + baseData.rentals.danebo.marketValue + baseData.rentals.century.marketValue;
+            document.getElementById('totalRealEstateValue').textContent = formatCurrency(totalValue);
+
+            // Total equity (household 50%)
+            const totalEquity = homeEquity +
+                ((baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance) * ownership) +
+                ((baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance) * ownership);
+            document.getElementById('totalEquity').textContent = formatCurrency(totalEquity);
+
+            // Total monthly mortgage payments (household 50%)
+            const totalMortgages = (home.mortgagePayment + baseData.rentals.danebo.mortgagePayment + baseData.rentals.century.mortgagePayment) * ownership;
+            document.getElementById('totalMortgages').textContent = formatCurrency(totalMortgages) + '/mo';
+
+            // Post-payoff costs (all properties - just tax + insurance)
+            const allPostPayoff = (
+                (home.propertyTax + home.insurance) +
+                (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) +
+                (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance)
+            ) / 12 * ownership;
+            document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff) + '/mo';
+        }
+
+        // Calculate mortgage savings for a specific year (how much less expense due to payoffs)
+        function calculateMortgageSavings(year) {
+            const homeExtraPrincipal = parseFloat(document.getElementById('homeExtraPrincipal').value) || 0;
+            const r = getRentalInputValues();
+            const ownership = baseData.rentalOwnership;
+            const home = baseData.primaryResidence;
+
+            let savings = 0;
+
+            // Home mortgage payoff
+            const homePayoff = calculateMortgagePayoff(
+                home.mortgageBalance, home.mortgagePI, home.mortgageRate,
+                homeExtraPrincipal * 2, baseData.currentYear
+            );
+            if (year >= homePayoff) {
+                // Mortgage paid off - save the P&I portion (escrow/tax/ins still owed)
+                savings += home.mortgagePI * 12 * ownership;
+            }
+
+            // Danebo payoff (not counted in expenses since it's a rental)
+            // Century payoff (not counted in expenses since it's a rental)
+            // Rentals already handled separately in rental income calculations
+
+            return savings;
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Calculate portfolio with dynamic contributions (stops when each person retires)
+        // Supports multiple contribution changes: array of {person, year, amount} objects
+        function calculatePortfolioWithRetirements(years, returnRate, contribGrowth, mikeRetireYear, travisRetireYear, mikeContribStart, travisContribStart, changes = []) {
+            let value = baseData.currentPortfolio;
+            let mikeContrib = mikeContribStart;
+            let travisContrib = travisContribStart;
+            const projections = [];
+
+            // Sort changes by year for proper application
+            const sortedChanges = [...changes].sort((a, b) => a.year - b.year);
+
+            projections.push({
+                year: 0,
+                calendarYear: baseData.currentYear,
+                mikeAge: baseData.mikeAge,
+                travisAge: baseData.travisAge,
+                value: value,
+                mikeRetired: false,
+                travisRetired: false
+            });
+
+            // Get property sale info
+            const r = getRentalInputValues();
+            const ownership = baseData.rentalOwnership;
+            const home = baseData.primaryResidence;
+
+            for (let i = 1; i <= years; i++) {
+                const calYear = baseData.currentYear + i;
+                const mikeRetired = calYear > mikeRetireYear;
+                const travisRetired = calYear > travisRetireYear;
+
+                // Apply any contribution changes for this year (additive - adds to current amount)
+                sortedChanges.forEach(change => {
+                    if (change.year === calYear) {
+                        if (change.person === 'mike') {
+                            mikeContrib += change.amount;
+                        } else if (change.person === 'travis') {
+                            travisContrib += change.amount;
+                        }
+                    }
+                });
+
+                // Only count contributions from people still working
+                let yearContrib = 0;
+                if (!mikeRetired) yearContrib += mikeContrib;
+                if (!travisRetired) yearContrib += travisContrib;
+
+                // Add property sale proceeds if selling this year AND user wants to invest
+                let saleProceeds = 0;
+                if (r.homeSell && r.homeSellYear === calYear && r.homeInvestProceeds) {
+                    // Use user-specified invest amount
+                    saleProceeds += r.homeInvestAmount;
+                }
+                if (r.daneboSell && r.daneboSellYear === calYear && r.daneboInvestProceeds) {
+                    // Use user-specified invest amount
+                    saleProceeds += r.daneboInvestAmount;
+                }
+                if (r.centurySell && r.centurySellYear === calYear && r.centuryInvestProceeds) {
+                    // Use user-specified invest amount
+                    saleProceeds += r.centuryInvestAmount;
+                }
+
+                const growth = (value + yearContrib / 2) * returnRate;
+                value = value + yearContrib + growth + saleProceeds;
+
+                projections.push({
+                    year: i,
+                    calendarYear: calYear,
+                    mikeAge: baseData.mikeAge + i,
+                    travisAge: baseData.travisAge + i,
+                    value: value,
+                    mikeRetired: mikeRetired,
+                    travisRetired: travisRetired,
+                    contribution: yearContrib,
+                    mikeContrib: mikeRetired ? 0 : mikeContrib,
+                    travisContrib: travisRetired ? 0 : travisContrib
+                });
+
+                // Grow contributions for next year (after changes have been applied)
+                if (!mikeRetired) mikeContrib *= (1 + contribGrowth);
+                if (!travisRetired) travisContrib *= (1 + contribGrowth);
+            }
+            return projections;
+        }
+
+        // Calculate PERS pension
+        // OPSRP normal retirement: age 65, or age 58 with 30 years of service
+        // Early retirement: age 55 minimum, with actuarial reduction
+        // If you leave PERS employment before 55, you can still collect at 55+ with reduced benefit
+        //
+        // Parameters:
+        //   travisRetireAge: age when Travis stops working (leaves PERS employment)
+        //   salaryGrowthRate: annual salary growth rate
+        //   currentAge: Travis's current age at this point in the projection (for deferred collection)
+        function calculatePERSPension(travisRetireAge, salaryGrowthRate, currentAge = null) {
+            const normalRetireAge = 65;
+            const earlyFullRetireAge = 58; // if 30+ years service
+            const earliestCollectionAge = 55;
+
+            // Years of service = time worked at PERS employer (stops when you leave, regardless of collection age)
+            const yearsWorked = travisRetireAge - baseData.travisAge;
+            const lastWorkYear = baseData.currentYear + yearsWorked;
+            const yearsOfService = lastWorkYear - baseData.persStartYear;
+
+            // Final Average Salary based on when you STOP working
+            const fas = baseData.currentSalary * Math.pow(1 + salaryGrowthRate, yearsWorked);
+
+            // Base pension before any reduction (based on years worked, not collection age)
+            const basePension = baseData.persMultiplier * yearsOfService * fas;
+
+            // Determine when pension collection begins
+            // If you retire before 55, collection is deferred to 55
+            const collectionAge = Math.max(travisRetireAge, earliestCollectionAge);
+
+            // If currentAge is provided, check if we've reached collection age yet
+            if (currentAge !== null && currentAge < collectionAge) {
+                return {
+                    yearsOfService,
+                    fas,
+                    basePension,
+                    earlyRetireFactor: 0,
+                    reductionNote: `Deferred to age ${collectionAge}`,
+                    annualPension: 0,
+                    collectionAge,
+                    collecting: false
+                };
+            }
+
+            // Calculate early retirement reduction factor based on COLLECTION age (not retirement age)
+            let earlyRetireFactor = 1.0;
+            let reductionNote = "Full benefit";
+
+            if (collectionAge >= normalRetireAge) {
+                earlyRetireFactor = 1.0;
+                reductionNote = "Full benefit (age 65+)";
+            } else if (collectionAge >= earlyFullRetireAge && yearsOfService >= 30) {
+                earlyRetireFactor = 1.0;
+                reductionNote = "Full benefit (58 + 30yrs)";
+            } else {
+                // Actuarial reduction based on OPSRP AEF tables
+                // These factors are based on collection age, not when you stopped working
+                const aefFactors = {
+                    65: 1.00,
+                    64: 0.90,
+                    63: 0.81,
+                    62: 0.73,
+                    61: 0.66,
+                    60: 0.60,
+                    59: 0.55,
+                    58: 0.50,
+                    57: 0.46,
+                    56: 0.42,
+                    55: 0.39
+                };
+
+                const yearsEarly = normalRetireAge - collectionAge;
+                earlyRetireFactor = aefFactors[collectionAge] || (1 - (yearsEarly * 0.08));
+                const reductionPct = Math.round((1 - earlyRetireFactor) * 100);
+
+                if (travisRetireAge < earliestCollectionAge) {
+                    reductionNote = `-${reductionPct}% (collecting at ${collectionAge})`;
+                } else {
+                    reductionNote = `-${reductionPct}% (${yearsEarly} yrs early)`;
+                }
+            }
+
+            const annualPension = basePension * earlyRetireFactor;
+
+            return {
+                yearsOfService,
+                fas,
+                basePension,
+                earlyRetireFactor,
+                reductionNote,
+                annualPension,
+                collectionAge,
+                collecting: true
+            };
+        }
+
+        // Calculate Social Security (reduced if taken early)
+        function calculateSS(fullBenefit, claimAge) {
+            if (claimAge >= 67) return fullBenefit * 12;
+            if (claimAge >= 62) {
+                // Roughly 6.67% reduction per year before 67
+                const reduction = (67 - claimAge) * 0.0667;
+                return fullBenefit * 12 * (1 - reduction);
+            }
+            return 0; // Can't claim before 62
+        }
+
+        function getInputValues() {
+            return {
+                mikeRetireAge: parseInt(document.getElementById('mikeRetireAge').value),
+                travisRetireAge: parseInt(document.getElementById('travisRetireAge').value),
+                mikeContrib: parseFloat(document.getElementById('mikeContrib').value) || 0,
+                travisContrib: parseFloat(document.getElementById('travisContrib').value) || 0,
+                // Multiple contribution changes (up to 5)
+                contributionChanges: contributionChanges,
+                returnRate: parseFloat(document.getElementById('returnRate').value) / 100,
+                inflationRate: parseFloat(document.getElementById('inflationRate').value) / 100,
+                withdrawalRate: parseFloat(document.getElementById('withdrawalRate').value) / 100,
+                expenseReduction: parseFloat(document.getElementById('expenseReduction').value) / 100,
+                contribIncrease: parseFloat(document.getElementById('contribIncrease').value) / 100,
+                salaryGrowth: parseFloat(document.getElementById('salaryGrowth').value) / 100,
+                healthcareCost: parseFloat(document.getElementById('healthcareCost').value),
+                oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value),
+                mikeSs: parseFloat(document.getElementById('mikeSs').value),
+                travisSs: parseFloat(document.getElementById('travisSs').value)
+            };
+        }
+
+        function calculateScenarios() {
+            const v = getInputValues();
+            const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+
+            // Project portfolio for 35 years
+            // Build step changes object
+            const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges);
+
+            // Calculate phases
+            const phases = [];
+            const baseRetirementExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
+
+            // Determine key milestones
+            const persCollectionAge = Math.max(v.travisRetireAge, 55);
+            const persCollectionYear = baseData.currentYear + (persCollectionAge - baseData.travisAge);
+
+            const milestones = [
+                { year: mikeRetireYear, label: `Mike retires (${v.mikeRetireAge})` },
+                { year: travisRetireYear, label: `Travis retires (${v.travisRetireAge})` },
+                // Add PERS collection milestone if deferred (retiring before 55)
+                ...(v.travisRetireAge < 55 ? [{ year: persCollectionYear, label: `PERS starts (Travis 55)` }] : []),
+                { year: baseData.currentYear + (67 - baseData.mikeAge), label: 'Mike SS (67)' },
+                { year: baseData.currentYear + (67 - baseData.travisAge), label: 'Travis SS (67)' },
+                { year: baseData.currentYear + (65 - baseData.travisAge), label: 'Medicare (Travis 65)' }
+            ].sort((a, b) => a.year - b.year);
+
+            // Remove duplicates and past dates
+            const uniqueMilestones = [];
+            const seenYears = new Set();
+            milestones.forEach(m => {
+                if (m.year > baseData.currentYear && !seenYears.has(m.year)) {
+                    seenYears.add(m.year);
+                    uniqueMilestones.push(m);
+                }
+            });
+
+            // Build phases based on milestones
+            const phasePoints = [baseData.currentYear, ...uniqueMilestones.map(m => m.year)].slice(0, 6);
+
+            phasePoints.forEach((year, idx) => {
+                if (idx === 0) return; // Skip current year as start
+
+                const yearsFromNow = year - baseData.currentYear;
+                const proj = projections.find(p => p.calendarYear === year) || projections[projections.length - 1];
+                const mikeAge = baseData.mikeAge + yearsFromNow;
+                const travisAge = baseData.travisAge + yearsFromNow;
+
+                // Calculate income at this point
+                // Use >= so that retirement income kicks in during the retirement year
+                const mikeRetired = year >= mikeRetireYear;
+                const travisRetired = year >= travisRetireYear;
+                const bothRetired = mikeRetired && travisRetired;
+
+                // PERS pension (only if Travis has retired AND reached collection age)
+                let pension = 0;
+                let pensionReduction = '';
+                if (travisRetired) {
+                    // Pass current travisAge to check if pension collection has started
+                    const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge);
+                    pension = persCalc.annualPension;
+                    if (persCalc.earlyRetireFactor < 1.0 || !persCalc.collecting) {
+                        pensionReduction = persCalc.reductionNote;
+                    }
+                }
+
+                // Portfolio income
+                // If both retired: full withdrawal rate
+                // If only one retired: partial withdrawal (they need income, but Travis may still have salary)
+                let portfolioIncome = 0;
+                if (bothRetired) {
+                    portfolioIncome = proj.value * v.withdrawalRate;
+                } else if (mikeRetired && !travisRetired) {
+                    // Mike retired but Travis still working - Mike needs some income
+                    // Estimate: Mike's share of expenses minus any pension he'd get (he has none)
+                    // Simplified: ~40% of full withdrawal (Mike's portion of household)
+                    portfolioIncome = proj.value * v.withdrawalRate * 0.4;
+                } else if (travisRetired && !mikeRetired) {
+                    // Travis retired but Mike still working
+                    // Travis has PERS pension, so less portfolio needed
+                    // But still needs some for expenses beyond pension
+                    const gap = Math.max(0, (baseRetirementExpenses * 0.6) - pension);
+                    portfolioIncome = Math.min(gap, proj.value * v.withdrawalRate * 0.3);
+                }
+
+                // Social Security
+                let ssIncome = 0;
+                if (mikeAge >= 67) ssIncome += v.mikeSs * 12;
+                if (travisAge >= 67) ssIncome += v.travisSs * 12;
+
+                // Rental Income (your 50% share)
+                const rentalInputs = getRentalInputValues();
+                const rentalCalc = calculateRentalIncomeForYear(year, rentalInputs);
+                let rentalIncome = rentalCalc.totalNetIncome;
+                let rentalSaleProceeds = rentalCalc.saleProceeds;
+
+                // Expenses (inflation adjusted)
+                let expenses = baseRetirementExpenses * Math.pow(1 + v.inflationRate, yearsFromNow);
+
+                // Add healthcare costs for each retired person before Medicare (65)
+                // Healthcare cost input is per-person
+                let healthcareNeeded = 0;
+                if (mikeRetired && mikeAge < 65) healthcareNeeded += v.healthcareCost;
+                if (travisRetired && travisAge < 65) healthcareNeeded += v.healthcareCost;
+                expenses += healthcareNeeded;
+
+                // Subtract mortgage savings when home mortgage is paid off
+                // (mortgage is already included in base expenses)
+                const mortgageSavings = calculateMortgageSavings(year);
+                expenses -= mortgageSavings;
+
+                // Add one-time expenses in first year of full retirement
+                const prevPhaseYear = phasePoints[idx - 1];
+                const prevBothRetired = (prevPhaseYear > mikeRetireYear) && (prevPhaseYear > travisRetireYear);
+                if (bothRetired && !prevBothRetired) {
+                    // This is first phase of full retirement - spread one-time over ~5 years
+                    expenses += v.oneTimeExpenses / 5;
+                }
+
+                const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome;
+                const surplus = totalIncome - expenses;
+
+                phases.push({
+                    year,
+                    yearsFromNow,
+                    mikeAge,
+                    travisAge,
+                    label: uniqueMilestones.find(m => m.year === year)?.label || `Year ${year}`,
+                    portfolio: proj.value,
+                    pension,
+                    pensionReduction,
+                    portfolioIncome,
+                    ssIncome,
+                    rentalIncome,
+                    rentalSaleProceeds,
+                    totalIncome,
+                    expenses,
+                    surplus,
+                    status: surplus >= 0 ? 'yes' : (surplus >= -expenses * 0.2 ? 'maybe' : 'no')
+                });
+            });
+
+            return { phases, projections, mikeRetireYear, travisRetireYear };
+        }
+
+        function renderScenarios(phases) {
+            const tbody = document.getElementById('scenariosBody');
+            tbody.innerHTML = phases.map(p => `
+                <tr class="${p.label.includes('Travis retires') ? 'highlight-row' : ''}">
+                    <td>
+                        ${p.label}<br>
+                        <span class="age-display">Mike ${p.mikeAge} / Travis ${p.travisAge}</span>
+                    </td>
+                    <td>${p.yearsFromNow} yrs</td>
+                    <td>${formatCurrency(p.portfolio)}</td>
+                    <td style="font-size: 0.7rem;">
+                        ${p.pension > 0 ? `PERS: ${formatCurrency(p.pension)}${p.pensionReduction ? `<br><span style="color:#f87171;font-size:0.6rem">${p.pensionReduction}</span>` : ''}<br>` : ''}
+                        ${p.portfolioIncome > 0 ? `Port: ${formatCurrency(p.portfolioIncome)}<br>` : ''}
+                        ${p.ssIncome > 0 ? `SS: ${formatCurrency(p.ssIncome)}<br>` : ''}
+                        ${p.rentalIncome !== undefined ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
+                        ${p.rentalSaleProceeds > 0 ? `<br><span style="color:#fbbf24;font-size:0.6rem">+Sale: ${formatCurrency(p.rentalSaleProceeds)}</span>` : ''}
+                        ${p.totalIncome === 0 ? '<span style="color:var(--text-secondary)">Still working</span>' : ''}
+                    </td>
+                    <td>
+                        ${p.totalIncome > 0 || p.rentalIncome !== 0 ? `
+                            <span class="success-badge ${p.status}">
+                                ${p.surplus >= 0 ? '+' : ''}${formatCurrency(p.surplus)}
+                            </span>
+                        ` : '<span style="color:var(--text-secondary)">—</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChart(projections, mikeRetireYear, travisRetireYear) {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            if (chart) chart.destroy();
+
+            const v = getInputValues();
+
+            // Calculate target portfolio (amount needed to sustain retirement via withdrawal)
+            // This is what you'd need if you had NO pension or SS - portfolio only
+            const retirementExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
+            const targetPortfolio = retirementExpenses / v.withdrawalRate;
+
+            // Find retirement year indices
+            const mikeRetireIdx = projections.findIndex(p => p.calendarYear === mikeRetireYear);
+            const travisRetireIdx = projections.findIndex(p => p.calendarYear === travisRetireYear);
+            const laterRetireYear = Math.max(mikeRetireYear, travisRetireYear);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: projections.map(p => p.calendarYear),
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: projections.map(p => p.value),
+                        borderColor: '#4facfe',
+                        backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: projections.map((p, i) =>
+                            (i === mikeRetireIdx || i === travisRetireIdx) ? 6 : 0
+                        ),
+                        pointBackgroundColor: projections.map((p, i) =>
+                            i === mikeRetireIdx ? '#60a5fa' :
+                            i === travisRetireIdx ? '#4ade80' : '#4facfe'
+                        ),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    const p = projections[context[0].dataIndex];
+                                    return `Year ${p.calendarYear}`;
+                                },
+                                label: function(context) {
+                                    const p = projections[context.dataIndex];
+                                    return [
+                                        `Mike: Age ${p.mikeAge}${p.mikeRetired ? ' (retired)' : ''}`,
+                                        `Travis: Age ${p.travisAge}${p.travisRetired ? ' (retired)' : ''}`,
+                                        `Portfolio: ${formatCurrency(p.value)}`,
+                                        p.contribution !== undefined ? `Contributing: ${formatCurrency(p.contribution)}/yr` : ''
+                                    ].filter(Boolean);
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                mikeRetireLine: {
+                                    type: 'line',
+                                    xMin: mikeRetireYear,
+                                    xMax: mikeRetireYear,
+                                    borderColor: '#60a5fa',
+                                    borderWidth: 2,
+                                    borderDash: [6, 4],
+                                    label: {
+                                        display: true,
+                                        content: 'Mike',
+                                        position: 'start',
+                                        backgroundColor: '#60a5fa',
+                                        color: '#fff',
+                                        font: { size: 10 }
+                                    }
+                                },
+                                travisRetireLine: {
+                                    type: 'line',
+                                    xMin: travisRetireYear,
+                                    xMax: travisRetireYear,
+                                    borderColor: '#4ade80',
+                                    borderWidth: 2,
+                                    borderDash: [6, 4],
+                                    label: {
+                                        display: true,
+                                        content: 'Travis',
+                                        position: 'start',
+                                        backgroundColor: '#4ade80',
+                                        color: '#fff',
+                                        font: { size: 10 }
+                                    }
+                                },
+                                targetLine: {
+                                    type: 'line',
+                                    yMin: targetPortfolio,
+                                    yMax: targetPortfolio,
+                                    borderColor: '#fbbf24',
+                                    borderWidth: 2,
+                                    borderDash: [8, 4],
+                                    label: {
+                                        display: true,
+                                        content: `Target: ${formatCurrency(targetPortfolio)} (${(v.withdrawalRate*100).toFixed(1)}% of expenses)`,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(251, 191, 36, 0.9)',
+                                        color: '#000',
+                                        font: { size: 10 }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#666',
+                                maxTicksLimit: 10,
+                                callback: function(value, index) {
+                                    const p = projections[index];
+                                    if (p.calendarYear === mikeRetireYear) return `${p.calendarYear}\n(M:${p.mikeAge})`;
+                                    if (p.calendarYear === travisRetireYear) return `${p.calendarYear}\n(T:${p.travisAge})`;
+                                    return index % 5 === 0 ? p.calendarYear : '';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#666',
+                                callback: value => '$' + (value / 1000000).toFixed(1) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderIncomeBar(phases) {
+            // Find the phase where BOTH people have retired (full retirement)
+            // Need to find a phase where both pension > 0 and portfolioIncome > 0
+            // OR the last phase if that has income
+            let fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
+
+            // If no phase has both, check if the last phase has any income
+            if (!fullRetirePhase) {
+                fullRetirePhase = phases[phases.length - 1];
+            }
+
+            if (!fullRetirePhase || fullRetirePhase.totalIncome === 0) {
+                document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">Select retirement ages to see income breakdown</div>';
+                document.getElementById('incomeLegend').innerHTML = '';
+                document.getElementById('incomeBreakdownSubtitle').textContent = '(when both retired)';
+                return;
+            }
+
+            // Include rental income in total (use 0 if negative or undefined)
+            const rentalIncome = Math.max(0, fullRetirePhase.rentalIncome || 0);
+            const total = fullRetirePhase.pension + fullRetirePhase.portfolioIncome + fullRetirePhase.ssIncome + rentalIncome;
+
+            // Handle edge case where total is 0 or very small
+            if (total <= 0) {
+                document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">No income sources active yet</div>';
+                document.getElementById('incomeLegend').innerHTML = '';
+                document.getElementById('incomeBreakdownSubtitle').textContent = '(when both retired)';
+                return;
+            }
+
+            const pensionPct = (fullRetirePhase.pension / total) * 100;
+            const portfolioPct = (fullRetirePhase.portfolioIncome / total) * 100;
+            const ssPct = (fullRetirePhase.ssIncome / total) * 100;
+            const rentalPct = (rentalIncome / total) * 100;
+
+            document.getElementById('incomeBar').innerHTML = `
+                ${pensionPct > 0 ? `<div class="bar-pension" style="width:${pensionPct}%">${pensionPct > 10 ? 'PERS' : ''}</div>` : ''}
+                ${portfolioPct > 0 ? `<div class="bar-portfolio" style="width:${portfolioPct}%">${portfolioPct > 10 ? 'Portfolio' : ''}</div>` : ''}
+                ${ssPct > 0 ? `<div class="bar-ss" style="width:${ssPct}%">${ssPct > 10 ? 'SS' : ''}</div>` : ''}
+                ${rentalPct > 0 ? `<div class="bar-rental" style="width:${rentalPct}%">${rentalPct > 10 ? 'Rental' : ''}</div>` : ''}
+            `;
+
+            // Show which phase this represents
+            const phaseLabel = fullRetirePhase.label || `Year ${fullRetirePhase.year}`;
+
+            // Update subtitle to show what phase this represents
+            document.getElementById('incomeBreakdownSubtitle').textContent = `(Mike ${fullRetirePhase.mikeAge} / Travis ${fullRetirePhase.travisAge})`;
+
+            document.getElementById('incomeLegend').innerHTML = `
+                <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS Pension: ${formatCurrency(fullRetirePhase.pension)} (${pensionPct.toFixed(0)}%)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#4facfe"></div>Portfolio (${(getInputValues().withdrawalRate * 100).toFixed(1)}%): ${formatCurrency(fullRetirePhase.portfolioIncome)} (${portfolioPct.toFixed(0)}%)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Social Security: ${formatCurrency(fullRetirePhase.ssIncome)} (${ssPct.toFixed(0)}%)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Rental Income: ${formatCurrency(rentalIncome)} (${rentalPct.toFixed(0)}%)</div>
+                <div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(total)}/yr</strong></div>
+            `;
+        }
+
+        function updateDisplays() {
+            const v = getInputValues();
+
+            // Retirement timing helper text
+            const mikeYearsEl = document.getElementById('mikeYearsToRetire');
+            const travisYearsEl = document.getElementById('travisYearsToRetire');
+            const mikeYearEl = document.getElementById('mikeRetireYear');
+            const travisYearEl = document.getElementById('travisRetireYear');
+
+            if (mikeYearsEl) mikeYearsEl.textContent = v.mikeRetireAge - baseData.mikeAge;
+            if (travisYearsEl) travisYearsEl.textContent = v.travisRetireAge - baseData.travisAge;
+            if (mikeYearEl) mikeYearEl.textContent = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            if (travisYearEl) travisYearEl.textContent = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+
+            // Contribution displays (sync with person cards at bottom)
+            const mikeContribEl = document.getElementById('mikeContribDisplay');
+            const travisContribEl = document.getElementById('travisContribDisplay');
+            if (mikeContribEl) mikeContribEl.textContent = formatCurrency(v.mikeContrib);
+            if (travisContribEl) travisContribEl.textContent = formatCurrency(v.travisContrib);
+        }
+
+        function updateSummaryCards(phases) {
+            const v = getInputValues();
+
+            // Find Travis retirement phase for pension preview
+            // Don't pass currentAge here - we want to show what pension will be when collecting
+            const pers = calculatePERSPension(v.travisRetireAge, v.salaryGrowth);
+            document.getElementById('pensionPreview').textContent = formatCurrency(pers.annualPension) + '/yr';
+
+            // Show when collection starts
+            const collectionNote = v.travisRetireAge < 55
+                ? `${pers.yearsOfService.toFixed(1)} yrs service, collect at 55`
+                : `${pers.yearsOfService.toFixed(1)} yrs service at age ${v.travisRetireAge}`;
+            document.getElementById('pensionSubtext').textContent = collectionNote;
+
+            // Show early retirement reduction if applicable
+            const reductionEl = document.getElementById('pensionReduction');
+            if (pers.earlyRetireFactor < 1.0) {
+                reductionEl.innerHTML = `⚠️ ${pers.reductionNote}<br>Full would be ${formatCurrency(pers.basePension)}`;
+                reductionEl.style.display = 'block';
+                reductionEl.style.color = '#f87171';
+            } else {
+                reductionEl.innerHTML = `✓ ${pers.reductionNote}`;
+                reductionEl.style.color = '#4ade80';
+            }
+
+            // Find full retirement phase
+            const fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
+            if (fullRetirePhase) {
+                document.getElementById('totalIncomePreview').textContent = formatCurrency(fullRetirePhase.totalIncome) + '/yr';
+                const gap = fullRetirePhase.surplus;
+                document.getElementById('gapValue').textContent = (gap >= 0 ? '+' : '') + formatCurrency(gap);
+                document.getElementById('gapValue').className = 'card-value ' + (gap >= 0 ? 'green' : 'red');
+                document.getElementById('gapSubtext').textContent = gap >= 0 ? 'Annual surplus' : 'Annual shortfall';
+
+                // Update retirement status banner
+                updateStatusBanner(fullRetirePhase, v);
+            }
+        }
+
+        function updateStatusBanner(phase, inputs) {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const title = document.getElementById('statusTitle');
+            const detail = document.getElementById('statusDetail');
+
+            const surplus = phase.surplus;
+            const expenses = phase.adjustedExpenses;
+            const surplusPercent = (surplus / expenses) * 100;
+
+            // Remove existing classes
+            banner.classList.remove('green', 'yellow', 'red');
+
+            if (surplusPercent >= 10) {
+                // Green: 10%+ surplus - comfortable buffer
+                banner.classList.add('green');
+                icon.textContent = '✓';
+                title.textContent = 'On Track for Retirement';
+                detail.textContent = `Income exceeds expenses by ${formatCurrency(surplus)}/year (+${surplusPercent.toFixed(0)}% buffer) when both retired`;
+            } else if (surplusPercent >= -5) {
+                // Yellow: -5% to +10% - close but may need adjustments
+                banner.classList.add('yellow');
+                icon.textContent = '⚠';
+                if (surplus >= 0) {
+                    title.textContent = 'Close - Consider Adjustments';
+                    detail.textContent = `Income just covers expenses (+${formatCurrency(surplus)}/year). A small buffer is wise for unexpected costs.`;
+                } else {
+                    title.textContent = 'Slightly Short - Review Options';
+                    detail.textContent = `Income is ${formatCurrency(Math.abs(surplus))}/year below expenses. Consider working longer, saving more, or reducing expenses.`;
+                }
+            } else {
+                // Red: More than 5% shortfall - needs attention
+                banner.classList.add('red');
+                icon.textContent = '✗';
+                title.textContent = 'Needs Attention';
+                detail.textContent = `Income is ${formatCurrency(Math.abs(surplus))}/year below expenses (${Math.abs(surplusPercent).toFixed(0)}% gap). Adjust retirement age, savings, or expenses.`;
+            }
+        }
+
+        function update() {
+            updateDisplays();
+            updateRentalDisplays();
+            updateHomeDisplays();
+            const { phases, projections, mikeRetireYear, travisRetireYear } = calculateScenarios();
+            renderScenarios(phases);
+            renderChart(projections, mikeRetireYear, travisRetireYear);
+            renderIncomeBar(phases);
+            updateSummaryCards(phases);
+        }
+
+        // Event listeners
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', update);
+        });
+
+        // Number input listeners (for contributions)
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', update);
+            input.addEventListener('change', update);
+        });
+
+        // Initial render
+        loadTheme();
+        loadSectionStates();
+        renderChangesTable();
+        update();
+    </script>
+</body>
+</html>
