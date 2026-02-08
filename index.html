@@ -1049,12 +1049,24 @@
                             <span class="rental-stat-value" id="daneboValue">$409,900</span>
                         </div>
                         <div class="rental-stat">
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="daneboEquity">$205,158</span>
+                        </div>
+                        <div class="rental-stat">
                             <span class="rental-stat-label">Mortgage Payment</span>
                             <span class="rental-stat-value">$1,479/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
                             <span class="rental-stat-value" id="daneboPayoff">2050</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Interest Rate</span>
+                            <span class="rental-stat-value">3.75%</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">After Payoff</span>
+                            <span class="rental-stat-value" id="daneboPostPayoff">$402/mo</span>
                         </div>
                     </div>
                     <div class="rental-input-row">
@@ -1110,12 +1122,24 @@
                             <span class="rental-stat-value" id="centuryValue">$387,300</span>
                         </div>
                         <div class="rental-stat">
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="centuryEquity">$213,728</span>
+                        </div>
+                        <div class="rental-stat">
                             <span class="rental-stat-label">Mortgage Payment</span>
                             <span class="rental-stat-value">$1,314/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
                             <span class="rental-stat-value" id="centuryPayoff">~2044</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Interest Rate</span>
+                            <span class="rental-stat-value">3.75%</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">After Payoff</span>
+                            <span class="rental-stat-value" id="centuryPostPayoff">$377/mo</span>
                         </div>
                     </div>
                     <div class="rental-input-row">
@@ -1848,6 +1872,18 @@
 
             document.getElementById('daneboPayoff').textContent = r.daneboSell ? 'Selling ' + r.daneboSellYear : daneboPayoff;
             document.getElementById('centuryPayoff').textContent = r.centurySell ? 'Selling ' + r.centurySellYear : '~' + centuryPayoff;
+
+            // Update equity
+            const daneboEquity = baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance;
+            const centuryEquity = baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance;
+            document.getElementById('daneboEquity').textContent = formatCurrency(daneboEquity);
+            document.getElementById('centuryEquity').textContent = formatCurrency(centuryEquity);
+
+            // Update after-payoff monthly costs (tax + insurance only)
+            const daneboPostPayoff = (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12;
+            const centuryPostPayoff = (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12;
+            document.getElementById('daneboPostPayoff').textContent = formatCurrency(daneboPostPayoff) + '/mo';
+            document.getElementById('centuryPostPayoff').textContent = formatCurrency(centuryPostPayoff) + '/mo';
 
             // Calculate current year net income
             const currentIncome = calculateRentalIncomeForYear(baseData.currentYear, r);
