@@ -744,7 +744,7 @@
                 <div class="card-sub" id="gapSubtext">Surplus at retirement</div>
             </div>
             <div class="card">
-                <div class="card-label">Rental Income (50%)</div>
+                <div class="card-label">Rental Income</div>
                 <div class="card-value orange" id="rentalIncomePreview">$0/yr</div>
                 <div class="card-sub" id="rentalIncomeSubtext">Current net (2 properties)</div>
             </div>
@@ -970,7 +970,7 @@
         <!-- Rental Properties Section -->
         <div class="collapsible-section" id="section-rentals">
             <div class="collapsible-header" onclick="toggleSection('rentals')">
-                <h3>🏠 Rental Properties <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <h3>🏠 Rental Properties</h3>
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
@@ -1049,8 +1049,8 @@
                             <span class="rental-stat-value" id="daneboValue">$409,900</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Mortgage</span>
-                            <span class="rental-stat-value">$739/mo</span>
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,479/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
@@ -1060,8 +1060,8 @@
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="daneboExtraPrincipal" min="0" max="2000" step="50" value="0">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="daneboExtraPrincipal" min="0" max="4000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1110,8 +1110,8 @@
                             <span class="rental-stat-value" id="centuryValue">$387,300</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Mortgage</span>
-                            <span class="rental-stat-value">$720/mo</span>
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,314/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
@@ -1121,8 +1121,8 @@
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="centuryExtraPrincipal" min="0" max="2000" step="50" value="62">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="centuryExtraPrincipal" min="0" max="4000" step="50" value="125">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1163,7 +1163,7 @@
         <!-- Primary Residence Section -->
         <div class="collapsible-section" id="section-home">
             <div class="collapsible-header" onclick="toggleSection('home')">
-                <h3>🏡 Primary Residence <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <h3>🏡 Primary Residence</h3>
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
@@ -1183,12 +1183,12 @@
                             <span class="rental-stat-value" id="homeValue">$481,000</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Equity</span>
-                            <span class="rental-stat-value green" id="homeEquity">$119,828</span>
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="homeEquity">$239,655</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Payment</span>
-                            <span class="rental-stat-value">$864/mo</span>
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,729/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
@@ -1200,14 +1200,14 @@
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">After Payoff</span>
-                            <span class="rental-stat-value" id="homePostPayoff">$286/mo</span>
+                            <span class="rental-stat-value" id="homePostPayoff">$572/mo</span>
                         </div>
                     </div>
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="homeExtraPrincipal" min="0" max="2000" step="50" value="0">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="homeExtraPrincipal" min="0" max="4000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1248,11 +1248,11 @@
                             <span class="rental-stat-value" id="totalRealEstateValue">$1,278,200</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <span class="rental-stat-label" style="font-size:0.8rem;">Household 50% Equity</span>
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Total Equity</span>
                             <span class="rental-stat-value green" id="totalEquity">$329,271</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <span class="rental-stat-label" style="font-size:0.8rem;">Household Monthly Mortgage Payments</span>
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Monthly Mortgage Payments</span>
                             <span class="rental-stat-value yellow" id="totalMortgages">$2,323/mo</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;">
@@ -1509,8 +1509,8 @@
             persStartYear: 2022.75,
             currentSalary: 152000,
             persMultiplier: 0.015,
-            // Ownership share of rentals (50/50 with Mike)
-            rentalOwnership: 0.50,
+            // Full household (married, shared finances)
+            rentalOwnership: 1.0,
             // Rental Properties
             rentals: {
                 danebo: {
@@ -1744,13 +1744,11 @@
                 }
 
                 // Calculate payoff year with extra principal
-                // extraPrincipal is the user input (50% share) - double it for full property amount
-                const fullExtraPrincipal = extraPrincipal * 2;
                 const payoffYear = calculateMortgagePayoff(
                     prop.mortgageBalance,
                     prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12, // Just P&I
                     prop.mortgageRate,
-                    fullExtraPrincipal,
+                    extraPrincipal,
                     baseData.currentYear
                 );
 
@@ -1784,7 +1782,6 @@
                 // Net operating income (full property)
                 const noi = effectiveRent - management - maintenance - taxes - insurance - mortgageCost - furnaceCost;
 
-                // Your 50% share
                 const netIncome = noi * ownership;
 
                 if (propKey === 'danebo') {
@@ -1833,19 +1830,19 @@
         function updateRentalDisplays() {
             const r = getRentalInputValues();
 
-            // Calculate payoff years (user input is 50% share, double for full property)
+            // Calculate payoff years
             const daneboPayoff = calculateMortgagePayoff(
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                r.daneboExtraPrincipal * 2,
+                r.daneboExtraPrincipal,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                r.centuryExtraPrincipal * 2,
+                r.centuryExtraPrincipal,
                 baseData.currentYear
             );
 
@@ -1875,7 +1872,7 @@
                 const saleValue = baseData.rentals.danebo.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.danebo.purchasePrice;
                 const tax = gain * 0.15;
-                const netProceeds = (saleValue - tax) * 0.5;
+                const netProceeds = saleValue - tax;
 
                 // Auto-populate invest amount if empty
                 const daneboInvestInput = document.getElementById('daneboInvestAmount');
@@ -1892,9 +1889,9 @@
                 }
 
                 document.getElementById('daneboCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~15%): ${formatCurrency(tax * 0.5)}<br>` +
-                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+                    `Sale value: ${formatCurrency(saleValue)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax)}<br>` +
+                    `Net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
 
             if (r.centurySell) {
@@ -1902,7 +1899,7 @@
                 const saleValue = baseData.rentals.century.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.century.purchasePrice;
                 const tax = gain * 0.15;
-                const netProceeds = (saleValue - tax) * 0.5;
+                const netProceeds = saleValue - tax;
 
                 // Auto-populate invest amount if empty
                 const centuryInvestInput = document.getElementById('centuryInvestAmount');
@@ -1919,9 +1916,9 @@
                 }
 
                 document.getElementById('centuryCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~15%): ${formatCurrency(tax * 0.5)}<br>` +
-                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+                    `Sale value: ${formatCurrency(saleValue)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax)}<br>` +
+                    `Net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
         }
 
@@ -1933,12 +1930,11 @@
             const home = baseData.primaryResidence;
 
             // Calculate home payoff year with extra principal
-            const fullExtraPrincipal = homeExtraPrincipal * 2;
             const homePayoff = calculateMortgagePayoff(
                 home.mortgageBalance,
                 home.mortgagePI,
                 home.mortgageRate,
-                fullExtraPrincipal,
+                homeExtraPrincipal,
                 baseData.currentYear
             );
             document.getElementById('homePayoff').textContent = '~' + homePayoff;
@@ -1963,7 +1959,7 @@
                 const monthlyRate = home.mortgageRate / 12;
                 for (let m = 0; m < monthsToSell && remainingMortgage > 0; m++) {
                     const interest = remainingMortgage * monthlyRate;
-                    const principal = monthlyPI - interest + (fullExtraPrincipal / 12);
+                    const principal = monthlyPI - interest + homeExtraPrincipal;
                     remainingMortgage = Math.max(0, remainingMortgage - principal);
                 }
 
@@ -1975,7 +1971,6 @@
                 const taxableGain = Math.max(0, gain - 500000); // $500K exclusion
                 const capGainsTax = taxableGain * 0.15;
 
-                // Net proceeds (household 50% share)
                 const netProceeds = (grossProceeds - capGainsTax) * ownership;
 
                 // Auto-populate invest amount field if it's 0 or empty
@@ -1998,47 +1993,55 @@
                     `Home value: ${formatCurrency(appreciatedValue)} (${(r.propertyAppreciation*100).toFixed(1)}%/yr appreciation)<br>` +
                     `Remaining mortgage: ${formatCurrency(remainingMortgage)}<br>` +
                     `Capital gains tax: ${formatCurrency(capGainsTax)} ${taxableGain === 0 ? '($500K exclusion applies)' : ''}<br>` +
-                    `<strong>Household net proceeds: ${formatCurrency(netProceeds)}</strong><br>` +
+                    `<strong>Net proceeds: ${formatCurrency(netProceeds)}</strong><br>` +
                     investStatus;
             }
 
-            // Calculate rental payoff years for totals (user input is 50% share, double for full)
+            // Calculate rental payoff years for totals
             const daneboPayoff = calculateMortgagePayoff(
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                r.daneboExtraPrincipal * 2,
+                r.daneboExtraPrincipal,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                r.centuryExtraPrincipal * 2,
+                r.centuryExtraPrincipal,
                 baseData.currentYear
             );
 
-            // Total real estate value
-            const totalValue = home.currentValue + baseData.rentals.danebo.marketValue + baseData.rentals.century.marketValue;
+            // Total real estate value (exclude sold properties)
+            let totalValue = 0;
+            let totalEquity = 0;
+            let totalMortgages = 0;
+            let allPostPayoff = 0;
+
+            if (!r.homeSell) {
+                totalValue += home.currentValue;
+                totalEquity += homeEquity;
+                totalMortgages += home.mortgagePayment;
+                allPostPayoff += home.propertyTax + home.insurance;
+            }
+            if (!r.daneboSell) {
+                totalValue += baseData.rentals.danebo.marketValue;
+                totalEquity += (baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance);
+                totalMortgages += baseData.rentals.danebo.mortgagePayment;
+                allPostPayoff += baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance;
+            }
+            if (!r.centurySell) {
+                totalValue += baseData.rentals.century.marketValue;
+                totalEquity += (baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance);
+                totalMortgages += baseData.rentals.century.mortgagePayment;
+                allPostPayoff += baseData.rentals.century.propertyTax + baseData.rentals.century.insurance;
+            }
+
             document.getElementById('totalRealEstateValue').textContent = formatCurrency(totalValue);
-
-            // Total equity (household 50%)
-            const totalEquity = homeEquity +
-                ((baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance) * ownership) +
-                ((baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance) * ownership);
             document.getElementById('totalEquity').textContent = formatCurrency(totalEquity);
-
-            // Total monthly mortgage payments (household 50%)
-            const totalMortgages = (home.mortgagePayment + baseData.rentals.danebo.mortgagePayment + baseData.rentals.century.mortgagePayment) * ownership;
             document.getElementById('totalMortgages').textContent = formatCurrency(totalMortgages) + '/mo';
-
-            // Post-payoff costs (all properties - just tax + insurance)
-            const allPostPayoff = (
-                (home.propertyTax + home.insurance) +
-                (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) +
-                (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance)
-            ) / 12 * ownership;
-            document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff) + '/mo';
+            document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff / 12) + '/mo';
         }
 
         // Calculate mortgage savings for a specific year (how much less expense due to payoffs)
@@ -2053,11 +2056,11 @@
             // Home mortgage payoff
             const homePayoff = calculateMortgagePayoff(
                 home.mortgageBalance, home.mortgagePI, home.mortgageRate,
-                homeExtraPrincipal * 2, baseData.currentYear
+                homeExtraPrincipal, baseData.currentYear
             );
             if (year >= homePayoff) {
                 // Mortgage paid off - save the P&I portion (escrow/tax/ins still owed)
-                savings += home.mortgagePI * 12 * ownership;
+                savings += home.mortgagePI * 12;
             }
 
             // Danebo payoff (not counted in expenses since it's a rental)
@@ -2403,7 +2406,7 @@
                 if (mikeAge >= 67) ssIncome += v.mikeSs * 12;
                 if (travisAge >= 67) ssIncome += v.travisSs * 12;
 
-                // Rental Income (your 50% share)
+                // Rental Income
                 const rentalInputs = getRentalInputValues();
                 const rentalCalc = calculateRentalIncomeForYear(year, rentalInputs);
                 let rentalIncome = rentalCalc.totalNetIncome;
