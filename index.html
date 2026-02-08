@@ -1303,7 +1303,7 @@
                             <th>Years</th>
                             <th>Portfolio</th>
                             <th>Income Sources</th>
-                            <th>vs Expenses</th>
+                            <th>Surplus / Gap</th>
                         </tr>
                     </thead>
                     <tbody id="scenariosBody">
@@ -2500,8 +2500,19 @@
         }
 
         function renderScenarios(phases) {
+            const v = getInputValues();
+            const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+
             const tbody = document.getElementById('scenariosBody');
-            tbody.innerHTML = phases.map(p => `
+            tbody.innerHTML = phases.map(p => {
+                const mikeRetired = p.year >= mikeRetireYear;
+                const travisRetired = p.year >= travisRetireYear;
+                const bothRetired = mikeRetired && travisRetired;
+                const oneWorking = (mikeRetired || travisRetired) && !bothRetired;
+                const whoWorking = oneWorking ? (mikeRetired ? 'Travis' : 'Mike') : '';
+
+                return `
                 <tr class="${p.label.includes('Travis retires') ? 'highlight-row' : ''}">
                     <td>
                         ${p.label}<br>
@@ -2513,19 +2524,22 @@
                         ${p.pension > 0 ? `PERS: ${formatCurrency(p.pension)}${p.pensionReduction ? `<br><span style="color:#f87171;font-size:0.6rem">${p.pensionReduction}</span>` : ''}<br>` : ''}
                         ${p.portfolioIncome > 0 ? `Port: ${formatCurrency(p.portfolioIncome)}<br>` : ''}
                         ${p.ssIncome > 0 ? `SS: ${formatCurrency(p.ssIncome)}<br>` : ''}
-                        ${p.rentalIncome !== undefined ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
+                        ${p.rentalIncome !== undefined && (p.rentalIncome !== 0 || bothRetired) ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
                         ${p.rentalSaleProceeds > 0 ? `<br><span style="color:#fbbf24;font-size:0.6rem">+Sale: ${formatCurrency(p.rentalSaleProceeds)}</span>` : ''}
-                        ${p.totalIncome === 0 ? '<span style="color:var(--text-secondary)">Still working</span>' : ''}
+                        ${!mikeRetired && !travisRetired ? '<span style="color:var(--text-secondary)">Both working</span>' : ''}
+                        ${oneWorking ? `<br><span style="color:var(--text-secondary);font-size:0.6rem">${whoWorking} still earning salary</span>` : ''}
                     </td>
                     <td>
-                        ${p.totalIncome > 0 || p.rentalIncome !== 0 ? `
+                        ${bothRetired ? `
                             <span class="success-badge ${p.status}">
                                 ${p.surplus >= 0 ? '+' : ''}${formatCurrency(p.surplus)}
                             </span>
+                        ` : oneWorking ? `
+                            <span style="color:var(--text-secondary);font-size:0.65rem;">Salary covers gap</span>
                         ` : '<span style="color:var(--text-secondary)">—</span>'}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function renderChart(projections, mikeRetireYear, travisRetireYear) {
@@ -2587,12 +2601,20 @@
                                 },
                                 label: function(context) {
                                     const p = projections[context.dataIndex];
-                                    return [
+                                    const yearsOut = p.calendarYear - baseData.currentYear;
+                                    const baseExp = baseData.annualExpenses * (1 - v.expenseReduction);
+                                    const estExpenses = baseExp * Math.pow(1 + v.inflationRate, yearsOut);
+                                    const lines = [
                                         `Mike: Age ${p.mikeAge}${p.mikeRetired ? ' (retired)' : ''}`,
                                         `Travis: Age ${p.travisAge}${p.travisRetired ? ' (retired)' : ''}`,
+                                        '',
                                         `Portfolio: ${formatCurrency(p.value)}`,
-                                        p.contribution !== undefined ? `Contributing: ${formatCurrency(p.contribution)}/yr` : ''
-                                    ].filter(Boolean);
+                                        p.contribution > 0 ? `Contributing: ${formatCurrency(p.contribution)}/yr` : null,
+                                        p.withdrawal > 0 ? `Withdrawing: ${formatCurrency(p.withdrawal)}/yr` : null,
+                                        '',
+                                        `Est. Expenses: ${formatCurrency(estExpenses)}/yr`
+                                    ];
+                                    return lines.filter(l => l !== null);
                                 }
                             }
                         },
