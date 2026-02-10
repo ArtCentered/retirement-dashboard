@@ -1791,10 +1791,12 @@
                 const taxes = prop.propertyTax * Math.pow(1.02, yearsFromNow); // 2% annual increase
                 const insurance = prop.insurance * Math.pow(1.02, yearsFromNow);
 
-                // Mortgage (0 if paid off)
+                // Mortgage P&I only (0 if paid off)
+                // Use P&I portion only since tax and insurance are already counted separately above
                 let mortgageCost = 0;
                 if (year < payoffYear) {
-                    mortgageCost = prop.mortgagePayment * 12;
+                    const monthlyPI = prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12;
+                    mortgageCost = monthlyPI * 12;
                 }
 
                 // Furnace loan (Danebo only)
