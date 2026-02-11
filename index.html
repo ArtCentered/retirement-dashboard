@@ -774,7 +774,7 @@
                 <div class="control-group">
                     <div class="control-label">
                         <span>Travis's Retirement Age</span>
-                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service (unless overridden with PERS Years setting). Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
+                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service (unless limited with the Limit PERS Years toggle). Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
                     </div>
                     <div class="input-group">
                         <input type="number" id="travisRetireAge" min="50" max="67" step="1" value="55">
@@ -918,11 +918,14 @@
                 </div>
                 <div class="control-group">
                     <div class="control-label">
-                        <span>PERS Total Years</span>
-                        <span class="info-tip">?<span class="tooltip">Total years Travis will work at a PERS employer (started Oct 2022). If you leave for a non-PERS job, your pension freezes at the years accrued. The pension formula is 1.5% × total years × final avg salary. Leave blank to assume PERS employment until retirement.</span></span>
+                        <span>Limit PERS Years</span>
+                        <span class="info-tip">?<span class="tooltip">Toggle on if Travis might leave PERS employment before retirement. When enabled, set the total years in PERS (started Oct 2022). The pension freezes at the years accrued. Formula: 1.5% × total years × final avg salary.</span></span>
                     </div>
-                    <div class="input-group">
-                        <input type="number" id="persYears" min="4" max="45" step="1" value="" placeholder="Until retire">
+                    <div class="input-group" style="gap: 6px;">
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:var(--text-secondary);">
+                            <input type="checkbox" id="persYearsToggle" onchange="togglePersYears()" style="width:16px;height:16px;accent-color:#fbbf24;">
+                        </label>
+                        <input type="number" id="persYears" min="4" max="45" step="1" value="10" disabled style="opacity:0.4;">
                         <span class="unit">yrs</span>
                     </div>
                 </div>
@@ -1729,6 +1732,15 @@
             update();
         }
 
+        // Toggle PERS years limit
+        function togglePersYears() {
+            const toggled = document.getElementById('persYearsToggle').checked;
+            const input = document.getElementById('persYears');
+            input.disabled = !toggled;
+            input.style.opacity = toggled ? '1' : '0.4';
+            update();
+        }
+
         // Calculate mortgage payoff year with extra principal
         function calculateMortgagePayoff(balance, monthlyPI, rate, extraPrincipal, currentYear) {
             if (balance <= 0) return currentYear;
@@ -2365,7 +2377,7 @@
                 expenseReduction: parseFloat(document.getElementById('expenseReduction').value) / 100,
                 contribIncrease: parseFloat(document.getElementById('contribIncrease').value) / 100,
                 salaryGrowth: parseFloat(document.getElementById('salaryGrowth').value) / 100,
-                persYears: document.getElementById('persYears').value ? parseFloat(document.getElementById('persYears').value) : null,
+                persYears: document.getElementById('persYearsToggle').checked ? parseFloat(document.getElementById('persYears').value) || 10 : null,
                 healthcareCost: parseFloat(document.getElementById('healthcareCost').value),
                 oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value),
                 mikeSs: parseFloat(document.getElementById('mikeSs').value),
