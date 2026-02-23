@@ -866,7 +866,7 @@
         <div class="collapsible-section" id="section-household-assets">
             <div class="collapsible-header" onclick="toggleSection('household-assets')">
                 <h3>💰 Accounts & Assets Overview</h3>
-                <span class="toggle-icon" id="toggle-household-assets">▼</span>
+                <span class="collapse-icon" id="toggle-household-assets">▼</span>
             </div>
             <div class="collapsible-content" id="content-household-assets">
                 <!-- Mike & Travis Retirement Accounts -->
@@ -1125,7 +1125,7 @@
                 <div class="control-group">
                     <div class="control-label">
                         <span>Travis's Retirement Age</span>
-                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service. Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
+                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service. Retiring before 55 defers pension collection. Age 55 = 39% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
                     </div>
                     <div class="input-group">
                         <input type="number" id="travisRetireAge" min="50" max="67" step="1" value="62">
@@ -1417,7 +1417,7 @@
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Market Value</span>
-                            <span class="rental-stat-value" id="daneboValue">$409,900</span>
+                            <span class="rental-stat-value" id="daneboValue">$410,100</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Monthly Mortgage</span>
@@ -1478,7 +1478,7 @@
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Market Value</span>
-                            <span class="rental-stat-value" id="centuryValue">$387,300</span>
+                            <span class="rental-stat-value" id="centuryValue">$383,300</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Monthly Mortgage</span>
@@ -1492,7 +1492,7 @@
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="centuryExtraPrincipal" min="0" max="2000" step="50" value="62">
+                        <input type="number" id="centuryExtraPrincipal" min="0" max="2000" step="50" value="125">
                         <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
@@ -1545,12 +1545,12 @@
                             <div class="rental-card-title" style="color:#60a5fa;">🏠 Timberline Dr</div>
                             <div class="rental-card-address">2965 Timberline Dr, Eugene</div>
                         </div>
-                        <span class="rental-status active">Primary Home</span>
+                        <span class="rental-status active" id="homeStatus">Primary Home</span>
                     </div>
                     <div class="rental-stats">
                         <div class="rental-stat">
                             <span class="rental-stat-label">Est. Value</span>
-                            <span class="rental-stat-value" id="homeValue">$481,000</span>
+                            <span class="rental-stat-value" id="homeValue">$489,000</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Equity</span>
@@ -1677,7 +1677,7 @@
         </div>
 
         <!-- How the Math Works -->
-        <div class="section-label" style="margin-top: 30px;">📖 How the math works</div>
+        <div style="margin-top: 30px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">📖 How the math works</div>
 
         <div class="collapsible-section" id="section-math-explainer">
             <div class="collapsible-header" onclick="toggleSection('math-explainer')">
@@ -1734,7 +1734,7 @@
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">📈 Portfolio Growth</h4>
-                    <p>Your investment portfolio (retirement accounts + brokerage) grows at the rate you set (default 7%). Contributions are modeled as mid-year additions, meaning money added during the year earns about half a year's growth. Withdrawals in retirement reduce the balance. The chart shows the projected trajectory including all contributions, withdrawals, and any property sale proceeds you choose to invest.</p>
+                    <p>Your investment portfolio (retirement accounts + brokerage) grows at the rate you set (default 6%). Contributions are modeled as mid-year additions, meaning money added during the year earns about half a year's growth. Withdrawals in retirement reduce the balance. The chart shows the projected trajectory including all contributions, withdrawals, and any property sale proceeds you choose to invest.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -1759,7 +1759,7 @@
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">⚙️ Key Assumptions You Can Adjust</h4>
-                    <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — professionally managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (7% is a common long-term stock market average), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: management fee (8%) is what you pay, vacancy (3%) reflects Eugene's low turnover, and maintenance (0.5%) is realistic for well-kept properties. Try setting management to 0% to see the self-managing upside, or bump vacancy to 8% to stress-test a rough year. Small changes in these rates compound significantly over 20-30 years.</p>
+                    <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — professionally managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (default 6% — conservative; the long-term stock market average is 7-10% but this accounts for a balanced portfolio), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: management fee (8%) is what you pay, vacancy (3%) reflects Eugene's low turnover, and maintenance (0.5%) is realistic for well-kept properties. Try setting management to 0% to see the self-managing upside, or bump vacancy to 8% to stress-test a rough year. Small changes in these rates compound significantly over 20-30 years.</p>
                 </div>
 
                 <div style="padding: 12px; background: var(--accent-light); border-radius: 8px; border-left: 3px solid #4facfe; font-size: 0.8rem;">
@@ -1837,7 +1837,7 @@
 
         // Load saved section states
         function loadSectionStates() {
-            const sections = ['retirement-ages', 'rentals', 'home', 'household-assets'];
+            const sections = ['retirement-ages', 'rentals', 'home', 'household-assets', 'math-explainer'];
             sections.forEach(id => {
                 const saved = localStorage.getItem('section-' + id);
                 const section = document.getElementById('section-' + id);
@@ -1906,7 +1906,7 @@
                     mortgagePayoff: 2050,        // Standard payoff (2044 with current extra)
                     propertyTax: 3297,           // Annual
                     insurance: 1223,             // Annual
-                    extraPrincipal: 125,         // Monthly extra payment (current)
+                    extraPrincipal: 0,           // Controlled by UI input below
                     furnaceLoan: 0,
                     furnaceLoanEnd: null
                 }
@@ -2225,8 +2225,10 @@
             document.getElementById('centuryNetIncome').className = 'rental-stat-value ' + (currentIncome.centuryIncome >= 0 ? 'green' : 'red');
 
             // Update rental summary card at top
+            const activeCount = (r.daneboSell ? 0 : 1) + (r.centurySell ? 0 : 1);
             document.getElementById('rentalIncomePreview').textContent = formatCurrency(currentIncome.totalNetIncome) + '/yr';
             document.getElementById('rentalIncomePreview').className = 'card-value ' + (currentIncome.totalNetIncome >= 0 ? 'orange' : 'red');
+            document.getElementById('rentalIncomeSubtext').textContent = activeCount === 2 ? 'Current net (2 properties)' : activeCount === 1 ? 'Current net (1 property)' : 'No active rentals';
 
             // Update property values with appreciation
             document.getElementById('daneboValue').textContent = formatCurrency(baseData.rentals.danebo.marketValue);
@@ -2238,7 +2240,7 @@
                 const saleValue = baseData.rentals.danebo.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.danebo.purchasePrice;
                 const tax = gain * 0.19; // 15% federal + ~4% Oregon
-                const netProceeds = (saleValue - tax) * 0.5;
+                const netProceeds = (saleValue - tax) * ownership;
 
                 // Auto-populate invest amount if empty
                 const daneboInvestInput = document.getElementById('daneboInvestAmount');
@@ -2255,8 +2257,8 @@
                 }
 
                 document.getElementById('daneboCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~19%): ${formatCurrency(tax * 0.5)}<br>` +
+                    `Sale value: ${formatCurrency(saleValue * ownership)}<br>` +
+                    `Cap gains tax (~19%): ${formatCurrency(tax * ownership)}<br>` +
                     `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
 
@@ -2265,7 +2267,7 @@
                 const saleValue = baseData.rentals.century.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.century.purchasePrice;
                 const tax = gain * 0.19; // 15% federal + ~4% Oregon
-                const netProceeds = (saleValue - tax) * 0.5;
+                const netProceeds = (saleValue - tax) * ownership;
 
                 // Auto-populate invest amount if empty
                 const centuryInvestInput = document.getElementById('centuryInvestAmount');
@@ -2282,8 +2284,8 @@
                 }
 
                 document.getElementById('centuryCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~19%): ${formatCurrency(tax * 0.5)}<br>` +
+                    `Sale value: ${formatCurrency(saleValue * ownership)}<br>` +
+                    `Cap gains tax (~19%): ${formatCurrency(tax * ownership)}<br>` +
                     `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
         }
@@ -2309,6 +2311,7 @@
             // Home equity (current)
             const homeEquity = (home.currentValue - home.mortgageBalance) * ownership;
             document.getElementById('homeEquity').textContent = formatCurrency(homeEquity);
+            document.getElementById('homeValue').textContent = formatCurrency(home.currentValue);
 
             // Post-payoff monthly cost (just tax + insurance)
             const postPayoffMonthly = ((home.propertyTax + home.insurance) / 12) * ownership;
@@ -2326,7 +2329,7 @@
                 const monthlyRate = home.mortgageRate / 12;
                 for (let m = 0; m < monthsToSell && remainingMortgage > 0; m++) {
                     const interest = remainingMortgage * monthlyRate;
-                    const principal = monthlyPI - interest + (fullExtraPrincipal / 12);
+                    const principal = monthlyPI - interest + fullExtraPrincipal;
                     remainingMortgage = Math.max(0, remainingMortgage - principal);
                 }
 
@@ -2655,24 +2658,24 @@
 
         function getInputValues() {
             return {
-                mikeRetireAge: parseInt(document.getElementById('mikeRetireAge').value),
-                travisRetireAge: parseInt(document.getElementById('travisRetireAge').value),
+                mikeRetireAge: parseInt(document.getElementById('mikeRetireAge').value) || 62,
+                travisRetireAge: parseInt(document.getElementById('travisRetireAge').value) || 62,
                 mikeContrib: parseFloat(document.getElementById('mikeContrib').value) || 0,
                 travisContrib: parseFloat(document.getElementById('travisContrib').value) || 0,
                 // Multiple contribution changes (up to 5)
                 contributionChanges: contributionChanges,
-                returnRate: parseFloat(document.getElementById('returnRate').value) / 100,
-                inflationRate: parseFloat(document.getElementById('inflationRate').value) / 100,
-                withdrawalRate: parseFloat(document.getElementById('withdrawalRate').value) / 100,
-                federalTaxRate: parseFloat(document.getElementById('federalTaxRate').value) / 100,
-                oregonTaxRate: parseFloat(document.getElementById('oregonTaxRate').value) / 100,
-                expenseReduction: parseFloat(document.getElementById('expenseReduction').value) / 100,
-                contribIncrease: parseFloat(document.getElementById('contribIncrease').value) / 100,
-                salaryGrowth: parseFloat(document.getElementById('salaryGrowth').value) / 100,
-                healthcareCost: parseFloat(document.getElementById('healthcareCost').value),
-                oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value),
-                mikeSs: parseFloat(document.getElementById('mikeSs').value),
-                travisSs: parseFloat(document.getElementById('travisSs').value)
+                returnRate: (parseFloat(document.getElementById('returnRate').value) || 0) / 100,
+                inflationRate: (parseFloat(document.getElementById('inflationRate').value) || 0) / 100,
+                withdrawalRate: (parseFloat(document.getElementById('withdrawalRate').value) || 0) / 100,
+                federalTaxRate: (parseFloat(document.getElementById('federalTaxRate').value) || 0) / 100,
+                oregonTaxRate: (parseFloat(document.getElementById('oregonTaxRate').value) || 0) / 100,
+                expenseReduction: (parseFloat(document.getElementById('expenseReduction').value) || 0) / 100,
+                contribIncrease: (parseFloat(document.getElementById('contribIncrease').value) || 0) / 100,
+                salaryGrowth: (parseFloat(document.getElementById('salaryGrowth').value) || 0) / 100,
+                healthcareCost: parseFloat(document.getElementById('healthcareCost').value) || 0,
+                oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value) || 0,
+                mikeSs: parseFloat(document.getElementById('mikeSs').value) || 0,
+                travisSs: parseFloat(document.getElementById('travisSs').value) || 0
             };
         }
 
@@ -2983,7 +2986,7 @@
                                     borderDash: [8, 4],
                                     label: {
                                         display: true,
-                                        content: `Target: ${formatCurrency(targetPortfolio)} (${(v.withdrawalRate*100).toFixed(1)}% of expenses)`,
+                                        content: `Target: ${formatCurrency(targetPortfolio)} (at ${(v.withdrawalRate*100).toFixed(1)}% withdrawal)`,
                                         position: 'end',
                                         backgroundColor: 'rgba(251, 191, 36, 0.9)',
                                         color: '#000',
