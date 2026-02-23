@@ -3196,14 +3196,27 @@
             updateSummaryCards(phases);
         }
 
-        // Event listeners
-        document.querySelectorAll('input[type="range"]').forEach(input => {
-            input.addEventListener('input', update);
+        // Debounced update for smoother mobile experience
+        let updateTimer = null;
+        function debouncedUpdate() {
+            if (updateTimer) clearTimeout(updateTimer);
+            updateTimer = setTimeout(update, 150);
+        }
+
+        // Event listeners — use multiple event types for mobile compatibility
+        // iOS Safari sometimes doesn't fire 'input' on number fields until blur
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', debouncedUpdate);
+            input.addEventListener('change', update);  // Fires on blur / stepper tap
+            input.addEventListener('blur', update);     // Catches iOS keyboard dismiss
         });
 
-        // Number input listeners (for contributions)
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('input', update);
+        // Checkbox and select listeners (inline handlers already exist,
+        // but this ensures any dynamically added ones are caught)
+        document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.addEventListener('change', update);
+        });
+        document.querySelectorAll('select').forEach(input => {
             input.addEventListener('change', update);
         });
 
