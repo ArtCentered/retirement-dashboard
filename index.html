@@ -669,7 +669,7 @@
         .phase-tabs {
             display: flex;
             gap: 4px;
-            margin: 10px 0 15px 0;
+            margin: 10px 0 8px 0;
             flex-wrap: wrap;
         }
         .phase-tab {
@@ -691,6 +691,51 @@
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
+        }
+
+        /* Year Stepper */
+        .year-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 0 12px 0;
+        }
+        .year-step-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .year-step-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--bg-secondary);
+        }
+        .year-step-btn:active {
+            transform: scale(0.92);
+        }
+        .year-step-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+        .year-step-display {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            min-width: 200px;
+            text-align: center;
+        }
+        .year-step-display strong {
+            color: var(--accent);
+            font-size: 0.95rem;
         }
 
         /* Expense Bar */
@@ -860,6 +905,9 @@
             .expense-legend { font-size: 0.7rem; }
             .phase-tabs { gap: 3px; }
             .phase-tab { padding: 5px 8px; font-size: 0.65rem; }
+            .year-stepper { gap: 6px; }
+            .year-step-btn { width: 34px; height: 34px; }
+            .year-step-display { font-size: 0.75rem; min-width: 160px; }
             .surplus-indicator { font-size: 0.75rem; padding: 6px 10px; }
 
             /* Collapsible sections */
@@ -1773,6 +1821,11 @@
         <div class="income-breakdown">
             <div class="result-title" style="color: #fbbf24;">💵 Income vs. Expenses at Retirement <span id="incomeBreakdownSubtitle" style="font-size:0.8rem;color:var(--text-secondary);">(when both retired)</span></div>
             <div class="phase-tabs" id="phaseTabs"></div>
+            <div class="year-stepper">
+                <button class="year-step-btn" id="yearStepDown" title="Previous year">◀</button>
+                <span class="year-step-display" id="yearStepDisplay"></span>
+                <button class="year-step-btn" id="yearStepUp" title="Next year">▶</button>
+            </div>
             <div class="bar-row-label">Income: <span id="incomeTotal"></span>/yr</div>
             <div id="incomeBarWrapper">
                 <div class="income-bar" id="incomeBar"></div>
@@ -2833,26 +2886,148 @@
             };
         }
 
+        // Compute income/expense breakdown for a single year
+        // Extracted from calculateScenarios() so it can be called for any year
+        function computeYearBreakdown(year, projections, v, config) {
+            const { mikeRetireYear, travisRetireYear, homePayoffYear, baseMortgagePI, baseTaxInsurance, retiredLivingExpenses, baseRetirementExpenses } = config;
+
+            const yearsFromNow = year - baseData.currentYear;
+            const proj = projections.find(p => p.calendarYear === year) || projections[projections.length - 1];
+            const mikeAge = baseData.mikeAge + yearsFromNow;
+            const travisAge = baseData.travisAge + yearsFromNow;
+
+            const mikeRetired = year >= mikeRetireYear;
+            const travisRetired = year >= travisRetireYear;
+            const bothRetired = mikeRetired && travisRetired;
+
+            // PERS pension (only if Travis has retired AND reached collection age)
+            let pension = 0;
+            let pensionReduction = '';
+            if (travisRetired) {
+                const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge);
+                pension = persCalc.annualPension;
+                if (persCalc.earlyRetireFactor < 1.0 || !persCalc.collecting) {
+                    pensionReduction = persCalc.reductionNote;
+                }
+            }
+
+            // Portfolio income
+            let portfolioIncome = 0;
+            if (bothRetired) {
+                portfolioIncome = proj.value * v.withdrawalRate;
+            } else if (mikeRetired && !travisRetired) {
+                portfolioIncome = proj.value * v.withdrawalRate * 0.4;
+            } else if (travisRetired && !mikeRetired) {
+                const gap = Math.max(0, (baseRetirementExpenses * 0.6) - pension);
+                portfolioIncome = Math.min(gap, proj.value * v.withdrawalRate * 0.3);
+            }
+
+            // Social Security (calculated before tax)
+            let ssGross = 0;
+            if (mikeAge >= 67) ssGross += v.mikeSs * 12;
+            if (travisAge >= 67) ssGross += v.travisSs * 12;
+
+            // Rental Income - calculated before tax
+            const rentalInputs = getRentalInputValues();
+            const rentalCalc = calculateRentalIncomeForYear(year, rentalInputs);
+            let rentalGross = rentalCalc.totalNetIncome;
+            let rentalSaleProceeds = rentalCalc.saleProceeds;
+
+            // === TAX CALCULATIONS ===
+            const pensionGross = pension;
+            const portfolioGross = portfolioIncome;
+            const combinedRate = v.federalTaxRate + v.oregonTaxRate;
+
+            pension = pension * (1 - combinedRate);
+            portfolioIncome = portfolioIncome * (1 - combinedRate);
+
+            let rentalIncome = rentalGross > 0 ? rentalGross * (1 - combinedRate) : rentalGross;
+
+            let ssIncome = ssGross;
+            const grossIncomeForSSTest = pensionGross + portfolioGross + ssGross + Math.max(0, rentalGross);
+            if (ssGross > 0 && grossIncomeForSSTest > 44000) {
+                ssIncome = ssGross - (ssGross * 0.85 * v.federalTaxRate);
+            }
+
+            // === WORKING INCOME ===
+            let workingIncome = 0;
+            if (!mikeRetired) {
+                const mikeSalaryGrown = v.mikeSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
+                workingIncome += mikeSalaryGrown * (1 - combinedRate);
+            }
+            if (!travisRetired) {
+                const travisSalaryGrown = v.travisSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
+                workingIncome += travisSalaryGrown * (1 - combinedRate);
+            }
+
+            // === EXPENSE BREAKDOWN ===
+            const inflationFactor = Math.pow(1 + v.inflationRate, yearsFromNow);
+            const mortgageExpense = (year < homePayoffYear) ? baseMortgagePI : 0;
+            const taxInsExpense = baseTaxInsurance * inflationFactor;
+            const livingExpense = retiredLivingExpenses * inflationFactor;
+
+            let healthcareExpense = 0;
+            if (mikeRetired && mikeAge < 65) healthcareExpense += v.healthcareCost;
+            if (travisRetired && travisAge < 65) healthcareExpense += v.healthcareCost;
+
+            // One-time expenses: spread over first 5 years of full retirement
+            let oneTimeExpense = 0;
+            const fullRetireYear = Math.max(mikeRetireYear, travisRetireYear);
+            if (bothRetired && year >= fullRetireYear && year < fullRetireYear + 5) {
+                oneTimeExpense = v.oneTimeExpenses / 5;
+            }
+
+            // Retirement savings (only from people still working)
+            let savingsExpense = 0;
+            if (!mikeRetired) savingsExpense += (proj.mikeContrib || 0);
+            if (!travisRetired) savingsExpense += (proj.travisContrib || 0);
+
+            let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense + savingsExpense;
+            const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome + workingIncome;
+            const surplus = totalIncome - expenses;
+
+            return {
+                year,
+                yearsFromNow,
+                mikeAge,
+                travisAge,
+                portfolio: proj.value,
+                pension,
+                pensionReduction,
+                portfolioIncome,
+                ssIncome,
+                rentalIncome,
+                rentalSaleProceeds,
+                workingIncome,
+                totalIncome,
+                expenses,
+                surplus,
+                status: surplus >= 0 ? 'yes' : (surplus >= -expenses * 0.2 ? 'maybe' : 'no'),
+                expenseBreakdown: {
+                    mortgage: mortgageExpense,
+                    taxInsurance: taxInsExpense,
+                    living: livingExpense,
+                    healthcare: healthcareExpense,
+                    oneTime: oneTimeExpense,
+                    savings: savingsExpense
+                }
+            };
+        }
+
         function calculateScenarios() {
             const v = getInputValues();
             const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
             const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
 
             // Project portfolio for 35 years
-            // Build step changes object
             const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges);
 
-            // Calculate phases
-            const phases = [];
-            const baseRetirementExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
-
-            // Decompose base expenses into categories for breakdown display
+            // Precompute expense config for reuse
             const baseMortgagePI = baseData.primaryResidence.mortgagePI * 12;
             const baseTaxInsurance = baseData.primaryResidence.propertyTax + baseData.primaryResidence.insurance;
             const baseLivingExpenses = baseData.annualExpenses - baseMortgagePI - baseTaxInsurance;
             const retiredLivingExpenses = baseLivingExpenses * (1 - v.expenseReduction);
-
-            // Calculate home mortgage payoff year for expense breakdown
+            const baseRetirementExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
             const homeExtraPrincipalForPayoff = parseFloat(document.getElementById('homeExtraPrincipal').value) || 0;
             const homePayoffYear = calculateMortgagePayoff(
                 baseData.primaryResidence.mortgageBalance,
@@ -2862,6 +3037,8 @@
                 baseData.currentYear
             );
 
+            const config = { mikeRetireYear, travisRetireYear, homePayoffYear, baseMortgagePI, baseTaxInsurance, retiredLivingExpenses, baseRetirementExpenses };
+
             // Determine key milestones
             const persCollectionAge = Math.max(v.travisRetireAge, 55);
             const persCollectionYear = baseData.currentYear + (persCollectionAge - baseData.travisAge);
@@ -2869,7 +3046,6 @@
             const milestones = [
                 { year: mikeRetireYear, label: `Mike retires (${v.mikeRetireAge})` },
                 { year: travisRetireYear, label: `Travis retires (${v.travisRetireAge})` },
-                // Add PERS collection milestone if deferred (retiring before 55)
                 ...(v.travisRetireAge < 55 ? [{ year: persCollectionYear, label: `PERS starts (Travis 55)` }] : []),
                 { year: baseData.currentYear + (67 - baseData.mikeAge), label: 'Mike SS (67)' },
                 { year: baseData.currentYear + (67 - baseData.travisAge), label: 'Travis SS (67)' },
@@ -2886,163 +3062,30 @@
                 }
             });
 
-            // Build phases based on milestones
+            // Build phases based on milestones (still used by scenario table)
             const phasePoints = [baseData.currentYear, ...uniqueMilestones.map(m => m.year)].slice(0, 6);
+            const phases = [];
 
             phasePoints.forEach((year, idx) => {
-                if (idx === 0) return; // Skip current year as start
-
-                const yearsFromNow = year - baseData.currentYear;
-                const proj = projections.find(p => p.calendarYear === year) || projections[projections.length - 1];
-                const mikeAge = baseData.mikeAge + yearsFromNow;
-                const travisAge = baseData.travisAge + yearsFromNow;
-
-                // Calculate income at this point
-                // Use >= so that retirement income kicks in during the retirement year
-                const mikeRetired = year >= mikeRetireYear;
-                const travisRetired = year >= travisRetireYear;
-                const bothRetired = mikeRetired && travisRetired;
-
-                // PERS pension (only if Travis has retired AND reached collection age)
-                let pension = 0;
-                let pensionReduction = '';
-                if (travisRetired) {
-                    // Pass current travisAge to check if pension collection has started
-                    const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge);
-                    pension = persCalc.annualPension;
-                    if (persCalc.earlyRetireFactor < 1.0 || !persCalc.collecting) {
-                        pensionReduction = persCalc.reductionNote;
-                    }
-                }
-
-                // Portfolio income
-                // If both retired: full withdrawal rate
-                // If only one retired: partial withdrawal (they need income, but Travis may still have salary)
-                let portfolioIncome = 0;
-                if (bothRetired) {
-                    portfolioIncome = proj.value * v.withdrawalRate;
-                } else if (mikeRetired && !travisRetired) {
-                    // Mike retired but Travis still working - Mike needs some income
-                    // Estimate: Mike's share of expenses minus any pension he'd get (he has none)
-                    // Simplified: ~40% of full withdrawal (Mike's portion of household)
-                    portfolioIncome = proj.value * v.withdrawalRate * 0.4;
-                } else if (travisRetired && !mikeRetired) {
-                    // Travis retired but Mike still working
-                    // Travis has PERS pension, so less portfolio needed
-                    // But still needs some for expenses beyond pension
-                    const gap = Math.max(0, (baseRetirementExpenses * 0.6) - pension);
-                    portfolioIncome = Math.min(gap, proj.value * v.withdrawalRate * 0.3);
-                }
-
-                // Social Security (calculated before tax)
-                let ssGross = 0;
-                if (mikeAge >= 67) ssGross += v.mikeSs * 12;
-                if (travisAge >= 67) ssGross += v.travisSs * 12;
-
-                // Rental Income - calculated before tax
-                const rentalInputs = getRentalInputValues();
-                const rentalCalc = calculateRentalIncomeForYear(year, rentalInputs);
-                let rentalGross = rentalCalc.totalNetIncome; // "net" of expenses, but pre-income-tax
-                let rentalSaleProceeds = rentalCalc.saleProceeds;
-
-                // === TAX CALCULATIONS ===
-                // Save pre-tax values for SS threshold check
-                const pensionGross = pension;
-                const portfolioGross = portfolioIncome;
-                const combinedRate = v.federalTaxRate + v.oregonTaxRate;
-
-                // Federal + Oregon tax on pension and portfolio withdrawals
-                pension = pension * (1 - combinedRate);
-                portfolioIncome = portfolioIncome * (1 - combinedRate);
-
-                // Federal + Oregon tax on rental income (positive rental income is taxable)
-                let rentalIncome = rentalGross > 0 ? rentalGross * (1 - combinedRate) : rentalGross;
-
-                // Federal tax on Social Security: ~85% taxable above $44K combined income
-                // Use PRE-TAX gross income for threshold comparison
-                let ssIncome = ssGross;
-                const grossIncomeForSSTest = pensionGross + portfolioGross + ssGross + Math.max(0, rentalGross);
-                if (ssGross > 0 && grossIncomeForSSTest > 44000) {
-                    // 85% of SS is federally taxable (Oregon does NOT tax SS)
-                    ssIncome = ssGross - (ssGross * 0.85 * v.federalTaxRate);
-                }
-
-                // === WORKING INCOME (salary for anyone still employed) ===
-                let workingIncome = 0;
-                if (!mikeRetired) {
-                    const mikeSalaryGrown = v.mikeSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
-                    workingIncome += mikeSalaryGrown * (1 - combinedRate);
-                }
-                if (!travisRetired) {
-                    const travisSalaryGrown = v.travisSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
-                    workingIncome += travisSalaryGrown * (1 - combinedRate);
-                }
-
-                // === EXPENSE BREAKDOWN ===
-                const inflationFactor = Math.pow(1 + v.inflationRate, yearsFromNow);
-
-                // Mortgage P&I: fixed nominal (not inflation-adjusted), drops to $0 at payoff
-                const mortgageExpense = (year < homePayoffYear) ? baseMortgagePI : 0;
-
-                // Property tax & insurance: grows with inflation
-                const taxInsExpense = baseTaxInsurance * inflationFactor;
-
-                // Living expenses: retirement-reduced, inflation-adjusted
-                const livingExpense = retiredLivingExpenses * inflationFactor;
-
-                // Healthcare: per-person pre-Medicare (65)
-                let healthcareExpense = 0;
-                if (mikeRetired && mikeAge < 65) healthcareExpense += v.healthcareCost;
-                if (travisRetired && travisAge < 65) healthcareExpense += v.healthcareCost;
-
-                // One-time expenses in first phase of full retirement
-                let oneTimeExpense = 0;
-                const prevPhaseYear = phasePoints[idx - 1];
-                const prevBothRetired = (prevPhaseYear > mikeRetireYear) && (prevPhaseYear > travisRetireYear);
-                if (bothRetired && !prevBothRetired) {
-                    oneTimeExpense = v.oneTimeExpenses / 5;
-                }
-
-                // Retirement savings (only from people still working in this phase)
-                let savingsExpense = 0;
-                if (!mikeRetired) savingsExpense += (proj.mikeContrib || 0);
-                if (!travisRetired) savingsExpense += (proj.travisContrib || 0);
-
-                let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense + savingsExpense;
-
-                const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome + workingIncome;
-                const surplus = totalIncome - expenses;
-
-                phases.push({
-                    year,
-                    yearsFromNow,
-                    mikeAge,
-                    travisAge,
-                    label: uniqueMilestones.find(m => m.year === year)?.label || `Year ${year}`,
-                    portfolio: proj.value,
-                    pension,
-                    pensionReduction,
-                    portfolioIncome,
-                    ssIncome,
-                    rentalIncome,
-                    rentalSaleProceeds,
-                    workingIncome,
-                    totalIncome,
-                    expenses,
-                    surplus,
-                    status: surplus >= 0 ? 'yes' : (surplus >= -expenses * 0.2 ? 'maybe' : 'no'),
-                    expenseBreakdown: {
-                        mortgage: mortgageExpense,
-                        taxInsurance: taxInsExpense,
-                        living: livingExpense,
-                        healthcare: healthcareExpense,
-                        oneTime: oneTimeExpense,
-                        savings: savingsExpense
-                    }
-                });
+                if (idx === 0) return;
+                const bd = computeYearBreakdown(year, projections, v, config);
+                bd.label = uniqueMilestones.find(m => m.year === year)?.label || `Year ${year}`;
+                phases.push(bd);
             });
 
-            return { phases, projections, mikeRetireYear, travisRetireYear };
+            // Build year-by-year data for the timeline slider
+            const firstYear = phasePoints[1]; // first milestone year
+            const lastYear = phasePoints[phasePoints.length - 1];
+            const yearByYearData = [];
+            for (let yr = firstYear; yr <= lastYear; yr++) {
+                const bd = computeYearBreakdown(yr, projections, v, config);
+                const milestone = uniqueMilestones.find(m => m.year === yr);
+                bd.label = milestone ? milestone.label : `Year ${yr}`;
+                bd.isMilestone = !!milestone;
+                yearByYearData.push(bd);
+            }
+
+            return { phases, projections, mikeRetireYear, travisRetireYear, yearByYearData, uniqueMilestones };
         }
 
         function renderScenarios(phases) {
@@ -3221,46 +3264,92 @@
             });
         }
 
-        // Global state for phase selection
-        let currentPhases = [];
-        let selectedPhaseIdx = -1; // -1 = auto-select full retirement
+        // Global state for year selection
+        let currentYearData = [];
+        let currentMilestones = [];
+        let selectedYearIdx = -1; // -1 = auto-select full retirement
+        let stepperInitialized = false;
 
-        function getActivePhaseIndex(phases) {
-            if (selectedPhaseIdx >= 0 && selectedPhaseIdx < phases.length) {
-                return selectedPhaseIdx;
+        function getActiveYearIndex() {
+            if (selectedYearIdx >= 0 && selectedYearIdx < currentYearData.length) {
+                return selectedYearIdx;
             }
-            // Auto-select: find first phase where both are retired (pension + portfolio)
-            const fullRetireIdx = phases.findIndex(p => p.pension > 0 && p.portfolioIncome > 0);
-            return fullRetireIdx >= 0 ? fullRetireIdx : phases.length - 1;
+            // Auto-select: first year where both are retired (pension + portfolio income)
+            const fullRetireIdx = currentYearData.findIndex(d => d.pension > 0 && d.portfolioIncome > 0);
+            return fullRetireIdx >= 0 ? fullRetireIdx : currentYearData.length - 1;
         }
 
         function selectPhase(idx) {
-            selectedPhaseIdx = idx;
-            renderPhaseTabs(currentPhases);
-            renderIncomeExpenseBars(currentPhases);
+            // idx is a milestone index — find matching year in yearByYearData
+            const milestone = currentMilestones[idx];
+            if (!milestone) return;
+            const dataIdx = currentYearData.findIndex(d => d.year === milestone.year);
+            if (dataIdx >= 0) {
+                selectedYearIdx = dataIdx;
+                renderPhaseTabs();
+                updateYearStepper();
+                renderIncomeExpenseBars(dataIdx);
+            }
         }
 
-        function renderPhaseTabs(phases) {
+        function renderPhaseTabs() {
             const container = document.getElementById('phaseTabs');
-            if (!container || phases.length === 0) return;
+            if (!container || currentMilestones.length === 0) return;
 
-            const activeIdx = getActivePhaseIndex(phases);
+            const activeIdx = getActiveYearIndex();
+            const activeYear = currentYearData[activeIdx]?.year;
 
-            container.innerHTML = phases.map((p, i) =>
-                `<button class="phase-tab${i === activeIdx ? ' active' : ''}" onclick="selectPhase(${i})">${p.label}</button>`
+            container.innerHTML = currentMilestones.map((m, i) =>
+                `<button class="phase-tab${m.year === activeYear ? ' active' : ''}" onclick="selectPhase(${i})">${m.label}</button>`
             ).join('');
         }
 
-        function renderIncomeBar(phases) {
-            currentPhases = phases;
-            selectedPhaseIdx = -1; // Reset to auto on each full update
-            renderPhaseTabs(phases);
-            renderIncomeExpenseBars(phases);
+        function updateYearStepper() {
+            const display = document.getElementById('yearStepDisplay');
+            const btnDown = document.getElementById('yearStepDown');
+            const btnUp = document.getElementById('yearStepUp');
+            if (!display) return;
+
+            const idx = getActiveYearIndex();
+            const d = currentYearData[idx];
+            if (!d) return;
+
+            const milestoneInfo = d.isMilestone ? ` — ${d.label}` : '';
+            display.innerHTML = `<strong>${d.year}</strong> &middot; Mike ${d.mikeAge} / Travis ${d.travisAge}${milestoneInfo}`;
+
+            if (btnDown) btnDown.disabled = (idx <= 0);
+            if (btnUp) btnUp.disabled = (idx >= currentYearData.length - 1);
         }
 
-        function renderIncomeExpenseBars(phases) {
-            const activeIdx = getActivePhaseIndex(phases);
-            const phase = phases[activeIdx];
+        function stepYear(delta) {
+            const current = getActiveYearIndex();
+            const next = current + delta;
+            if (next < 0 || next >= currentYearData.length) return;
+            selectedYearIdx = next;
+            renderPhaseTabs();
+            updateYearStepper();
+            renderIncomeExpenseBars(next);
+        }
+
+        function initYearStepper() {
+            if (stepperInitialized) return;
+            const btnDown = document.getElementById('yearStepDown');
+            const btnUp = document.getElementById('yearStepUp');
+            if (btnDown) btnDown.addEventListener('click', () => stepYear(-1));
+            if (btnUp) btnUp.addEventListener('click', () => stepYear(1));
+            stepperInitialized = true;
+        }
+
+        function renderIncomeBar(phases) {
+            selectedYearIdx = -1; // Reset to auto on each full recalculation
+            renderPhaseTabs();
+            updateYearStepper();
+            const activeIdx = getActiveYearIndex();
+            renderIncomeExpenseBars(activeIdx);
+        }
+
+        function renderIncomeExpenseBars(yearIdx) {
+            const phase = currentYearData[yearIdx];
 
             if (!phase) return;
 
@@ -3301,7 +3390,6 @@
                 `;
 
                 const v = getInputValues();
-                // Build income legend — only show non-zero items
                 let incomeLegendItems = [];
                 if (salaryIncome > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Salary: ${formatCurrency(salaryIncome)} (${salaryPct.toFixed(0)}%)</div>`);
                 if (phase.pension > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS: ${formatCurrency(phase.pension)} (${pensionPct.toFixed(0)}%)</div>`);
@@ -3341,7 +3429,6 @@
                     ${savingsPct > 0 ? `<div class="bar-savings" style="width:${savingsPct}%">${savingsPct > 8 ? 'Savings' : ''}</div>` : ''}
                 `;
 
-                // Build legend — only show non-zero categories
                 let legendItems = [];
                 if (eb.mortgage > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Mortgage P&I: ${formatCurrency(eb.mortgage)} (${mortgagePct.toFixed(0)}%)</div>`);
                 if (eb.taxInsurance > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Tax & Ins: ${formatCurrency(eb.taxInsurance)} (${taxInsPct.toFixed(0)}%)</div>`);
@@ -3481,7 +3568,9 @@
             updateDisplays();
             updateRentalDisplays();
             updateHomeDisplays();
-            const { phases, projections, mikeRetireYear, travisRetireYear } = calculateScenarios();
+            const { phases, projections, mikeRetireYear, travisRetireYear, yearByYearData, uniqueMilestones } = calculateScenarios();
+            currentYearData = yearByYearData;
+            currentMilestones = uniqueMilestones;
             renderScenarios(phases);
             renderChart(projections, mikeRetireYear, travisRetireYear);
             renderIncomeBar(phases);
@@ -3517,6 +3606,7 @@
         loadSectionStates();
         renderChangesTable();
         update();
+        initYearStepper();
     </script>
 </body>
 </html>
