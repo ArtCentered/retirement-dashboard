@@ -714,6 +714,7 @@
         .bar-healthcare { background: #ec4899; }
         .bar-living { background: #8b5cf6; }
         .bar-onetime { background: #6366f1; }
+        .bar-savings { background: #14b8a6; }
 
         /* Bar Row Labels */
         .bar-row-label {
@@ -3002,7 +3003,12 @@
                     oneTimeExpense = v.oneTimeExpenses / 5;
                 }
 
-                let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense;
+                // Retirement savings (only from people still working in this phase)
+                let savingsExpense = 0;
+                if (!mikeRetired) savingsExpense += (proj.mikeContrib || 0);
+                if (!travisRetired) savingsExpense += (proj.travisContrib || 0);
+
+                let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense + savingsExpense;
 
                 const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome + workingIncome;
                 const surplus = totalIncome - expenses;
@@ -3030,7 +3036,8 @@
                         taxInsurance: taxInsExpense,
                         living: livingExpense,
                         healthcare: healthcareExpense,
-                        oneTime: oneTimeExpense
+                        oneTime: oneTimeExpense,
+                        savings: savingsExpense
                     }
                 });
             });
@@ -3323,6 +3330,7 @@
                 const livingPct = (eb.living / totalExpenses) * 100;
                 const healthcarePct = (eb.healthcare / totalExpenses) * 100;
                 const oneTimePct = (eb.oneTime / totalExpenses) * 100;
+                const savingsPct = ((eb.savings || 0) / totalExpenses) * 100;
 
                 expenseBar.innerHTML = `
                     ${mortgagePct > 0 ? `<div class="bar-mortgage" style="width:${mortgagePct}%">${mortgagePct > 8 ? 'Mortgage' : ''}</div>` : ''}
@@ -3330,6 +3338,7 @@
                     ${livingPct > 0 ? `<div class="bar-living" style="width:${livingPct}%">${livingPct > 10 ? 'Living' : ''}</div>` : ''}
                     ${healthcarePct > 0 ? `<div class="bar-healthcare" style="width:${healthcarePct}%">${healthcarePct > 8 ? 'Healthcare' : ''}</div>` : ''}
                     ${oneTimePct > 0 ? `<div class="bar-onetime" style="width:${oneTimePct}%">${oneTimePct > 8 ? 'One-time' : ''}</div>` : ''}
+                    ${savingsPct > 0 ? `<div class="bar-savings" style="width:${savingsPct}%">${savingsPct > 8 ? 'Savings' : ''}</div>` : ''}
                 `;
 
                 // Build legend — only show non-zero categories
@@ -3339,6 +3348,7 @@
                 legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Living: ${formatCurrency(eb.living)} (${livingPct.toFixed(0)}%)</div>`);
                 if (eb.healthcare > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Healthcare: ${formatCurrency(eb.healthcare)} (${healthcarePct.toFixed(0)}%)</div>`);
                 if (eb.oneTime > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>One-time: ${formatCurrency(eb.oneTime)} (${oneTimePct.toFixed(0)}%)</div>`);
+                if (eb.savings > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div>Savings: ${formatCurrency(eb.savings)} (${savingsPct.toFixed(0)}%)</div>`);
                 legendItems.push(`<div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(totalExpenses)}/yr</strong></div>`);
 
                 expenseLegend.innerHTML = legendItems.join('');
