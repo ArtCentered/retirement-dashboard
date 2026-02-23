@@ -1686,60 +1686,62 @@
             <div class="collapsible-content" id="content-math-explainer" style="font-size: 0.85rem; line-height: 1.7; color: var(--text-secondary);">
 
                 <div style="margin-bottom: 20px;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">💰 Income Taxes</h4>
-                    <p>The dashboard applies two layers of income tax to money you receive in retirement:</p>
-                    <p style="margin: 8px 0;"><strong>Federal income tax</strong> (default 18%) — applied to Mike's PERS pension, any portfolio withdrawals (401k, 457b, etc.), and net rental profit. The 18% is a blended effective rate estimate; your actual rate depends on total income and deductions. You can adjust this in the "Retirement Ages & Contributions" section.</p>
-                    <p style="margin: 8px 0;"><strong>Oregon state income tax</strong> (default 8%) — applied to the same income as federal. Oregon has a top marginal rate of ~9.9%, so 8% is a conservative effective rate. Also adjustable.</p>
-                    <p style="margin: 8px 0;">Together, about <strong>26 cents of every dollar</strong> from pension, portfolio withdrawals, and rental profit goes to taxes. The remaining 74 cents is what you actually get to spend.</p>
+                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">💰 Income Taxes in Retirement</h4>
+                    <p>The dashboard applies two layers of income tax to retirement income:</p>
+                    <p style="margin: 8px 0;"><strong>Federal income tax</strong> (default 18%) is applied to PERS pension, portfolio withdrawals (401k, 457b, etc.), and net rental profit. The 18% is a blended effective rate estimate — actual rates depend on total income and deductions. This can be adjusted in the "Retirement Ages &amp; Contributions" section.</p>
+                    <p style="margin: 8px 0;"><strong>Oregon state income tax</strong> (default 8%) is applied to the same income sources. Oregon's top marginal rate is ~9.9%, so 8% is a conservative effective rate. Also adjustable.</p>
+                    <p style="margin: 8px 0;">Together, about <strong>26 cents of every dollar</strong> from pension, portfolio withdrawals, and rental profit goes to taxes. The remaining 74 cents is spendable income.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">🏛️ Social Security Taxes</h4>
-                    <p>Social Security has its own special tax rules. Oregon does <em>not</em> tax Social Security benefits at all — that's a nice perk of living here.</p>
-                    <p style="margin: 8px 0;">The federal government taxes up to 85% of your Social Security benefits, but only if your combined gross income (pension + withdrawals + rental income + Social Security) exceeds <strong>$44,000</strong> (the threshold for married filing jointly). Below that, your Social Security is tax-free.</p>
-                    <p style="margin: 8px 0;">When above the threshold, the dashboard calculates: <em>SS benefit minus (85% × benefit × federal tax rate)</em>. So if you receive $30,000/yr in Social Security and your federal rate is 18%, roughly $4,590 goes to federal tax and you keep ~$25,410.</p>
+                    <p>Social Security has its own tax treatment. Oregon does <em>not</em> tax Social Security benefits at all.</p>
+                    <p style="margin: 8px 0;">At the federal level, up to 85% of Social Security benefits are taxable — but only if combined gross income (pension + withdrawals + rental income + Social Security) exceeds <strong>$44,000</strong> (the married-filing-jointly threshold). Below that, Social Security is tax-free.</p>
+                    <p style="margin: 8px 0;">When above the threshold, the dashboard calculates: <em>SS benefit minus (85% &times; benefit &times; federal tax rate)</em>. For example, on $30,000/yr in Social Security at an 18% federal rate, roughly $4,590 goes to federal tax, leaving ~$25,410.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">🏠 Capital Gains on Property Sales</h4>
-                    <p>When you sell a property, the profit (sale price minus what you paid) is subject to capital gains tax. The dashboard uses a combined rate of <strong>19%</strong> (15% federal long-term capital gains + ~4% Oregon state).</p>
-                    <p style="margin: 8px 0;">For your <strong>primary residence</strong> (Timberline), there's a major benefit: married couples can exclude up to <strong>$500,000 in gains</strong> from tax. So if you bought for $351K and sell for $800K, only the gain above $500K would be taxed.</p>
-                    <p style="margin: 8px 0;">Rental properties do <strong>not</strong> get this exclusion — the full gain is taxable at 19%.</p>
+                    <p>When a property is sold, the profit (sale price minus purchase price) is subject to capital gains tax. The dashboard uses a combined rate of <strong>19%</strong> (15% federal long-term capital gains + ~4% Oregon state).</p>
+                    <p style="margin: 8px 0;">For a <strong>primary residence</strong>, there is a significant exclusion: married couples can exclude up to <strong>$500,000 in gains</strong> from tax. So a home purchased for $351K and sold for $800K would owe zero capital gains tax, since the $449K gain falls under the exclusion.</p>
+                    <p style="margin: 8px 0;">Rental properties do <strong>not</strong> qualify for this exclusion — the full gain is taxable at 19%.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">🏘️ How Rental Income Is Calculated</h4>
-                    <p>Each rental property's net income is calculated as:</p>
+                    <p>Each rental property's net income follows this formula:</p>
                     <p style="margin: 8px 0; padding: 10px; background: var(--accent-light); border-radius: 8px; font-family: monospace; font-size: 0.8rem;">
                         Rent collected<br>
-                        &minus; Vacancy loss (default 3% — ~11 days/year, reflects Eugene's strong rental market)<br>
-                        &minus; Property management fee (default 8% — what you pay your manager; set to 0% to model self-managing)<br>
-                        &minus; Maintenance reserve (default 0.5% of property value/year — ~$2K/property for routine upkeep)<br>
+                        &minus; Vacancy loss (default 3% — ~11 days/year turnover)<br>
+                        &minus; Property management fee (default 8% of collected rent)<br>
+                        &minus; Maintenance reserve (default 0.5% of property value/year)<br>
                         &minus; Property tax (increases ~2% per year)<br>
                         &minus; Insurance (increases ~2% per year)<br>
                         &minus; Mortgage principal &amp; interest (drops to $0 once paid off)<br>
-                        &minus; Any special loans (e.g., Danebo's furnace loan through 2029)<br>
+                        &minus; Any special loans (e.g., Danebo furnace loan through 2029)<br>
                         = <strong>Net rental income</strong>
                     </p>
-                    <p style="margin: 8px 0;">With the defaults tuned to your actual situation (8% management fee, low vacancy in Eugene), the numbers should closely match what you see in your bank account. The dashboard nets rental income into retirement projections, taxed at the combined ~26% rate when positive.</p>
-                    <p style="margin: 8px 0;"><strong>Stress-testing:</strong> Try bumping vacancy to 8% to simulate a rough year with a month empty between tenants. Or set management to 0% to see how much you'd save by self-managing. These levers show how much cushion your rental income has.</p>
-                    <p style="margin: 8px 0;">If a property shows <strong>negative</strong> in a stress test, it means the rent wouldn't fully cover costs under those conditions. In reality, rental losses can often be <strong>written off against your other income</strong> on your tax return (up to $25K/year for active participants). The dashboard doesn't model that tax benefit, so your actual situation would be slightly better than shown.</p>
-                    <p style="margin: 8px 0;"><strong>Why rentals improve over time:</strong> Once the mortgage is paid off, the biggest expense disappears and the property flips to strongly positive cash flow. Rent also increases each year while the mortgage payment stays fixed — the gap widens in your favor every year.</p>
+                    <p style="margin: 8px 0;">The defaults reflect current conditions: 8% management fee (what the property manager charges), 3% vacancy (Eugene's rental market has been consistently strong), and 0.5% maintenance (~$2K/property/year for routine upkeep). With these settings, the numbers should closely match actual bank deposits. Positive rental income is taxed at the combined ~26% rate in retirement projections.</p>
+                    <p style="margin: 8px 0;"><strong>Stress-testing:</strong> Bump vacancy to 8% to simulate a rough year with a month empty between tenants, or set management to 0% to see the self-managing upside. These levers show how much cushion rental income has under different conditions.</p>
+                    <p style="margin: 8px 0;">If a property shows <strong>negative</strong> in a stress test, it means rent wouldn't fully cover costs under those conditions. In practice, rental losses can often be <strong>deducted against other income</strong> on a tax return (up to $25K/year for active participants). The dashboard does not model that deduction, so actual take-home may be slightly better than shown.</p>
+                    <p style="margin: 8px 0;"><strong>Why rentals improve over time:</strong> Once the mortgage is paid off, the largest expense disappears and the property flips to strongly positive cash flow. Rent also increases each year while the fixed-rate mortgage payment stays flat — the spread widens every year.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">📊 What Property Tax &amp; Insurance Are <em>Not</em></h4>
-                    <p>Mike raised a good point: property taxes and insurance are paid through escrow as part of your monthly mortgage payment. In the dashboard, we break these out as separate line items — the mortgage line only counts principal &amp; interest, while property tax and insurance are tracked independently. This way, when the mortgage is eventually paid off, the dashboard correctly shows that you still owe property tax and insurance (you'd just pay them directly instead of through escrow). The total cost comes out the same, but breaking it out lets the model handle the transition from "paying mortgage" to "mortgage-free" accurately.</p>
+                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">📊 Why Mortgage, Tax &amp; Insurance Are Separated</h4>
+                    <p>In real life, property tax and insurance are bundled into the monthly mortgage payment through escrow — one payment covers principal, interest, tax, and insurance (often called PITI). The dashboard deliberately separates these into individual line items.</p>
+                    <p style="margin: 8px 0;">The reason: when the mortgage is eventually paid off, the principal and interest go to zero — but property tax and insurance remain ongoing costs. By tracking them separately, the dashboard can accurately model what expenses continue after payoff and what expenses stop. The total cost during the mortgage period comes out the same either way, but separating them ensures the post-payoff picture is correct.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">📈 Portfolio Growth</h4>
-                    <p>Your investment portfolio (retirement accounts + brokerage) grows at the rate you set (default 6%). Contributions are modeled as mid-year additions, meaning money added during the year earns about half a year's growth. Withdrawals in retirement reduce the balance. The chart shows the projected trajectory including all contributions, withdrawals, and any property sale proceeds you choose to invest.</p>
+                    <p>The investment portfolio (retirement accounts + brokerage) grows at the rate set in the controls (default 6%). This is a conservative estimate — the long-term stock market average is 7-10%, but 6% accounts for a balanced portfolio that includes bonds and other lower-growth holdings.</p>
+                    <p style="margin: 8px 0;">Contributions are modeled as mid-year additions, meaning money added during the year earns about half a year's growth. Contributions stop for each person in the year they retire. Withdrawals in retirement reduce the balance. The chart shows the projected trajectory including all contributions, withdrawals, and any property sale proceeds earmarked for investment.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">🧮 How Net Worth Is Calculated</h4>
-                    <p>The net worth number in the sidebar and header is computed from the same data that drives the rest of the dashboard. Nothing is hardcoded — every line comes from the property values, mortgage balances, and account totals entered above. Here's the exact formula:</p>
+                    <p>The net worth figure in the sidebar and header card is computed from the same data that drives every other part of the dashboard. Nothing is hardcoded — every line is derived from the property values, mortgage balances, and account totals in the sections above. Here is the exact formula:</p>
                     <p style="margin: 8px 0; padding: 10px; background: var(--accent-light); border-radius: 8px; font-family: monospace; font-size: 0.8rem;">
                         <strong>Real estate equity</strong><br>
                         &nbsp;&nbsp;Home: market value &minus; mortgage balance<br>
@@ -1753,17 +1755,22 @@
                         <br>
                         = <strong>Household Net Worth</strong>
                     </p>
-                    <p style="margin: 8px 0;">This is a <strong>full household</strong> view — it includes 100% of every asset you and Mike own together. The sidebar breaks it down line by line so you can verify each piece against your statements. If any number looks off, check the property values and balances in the sections above — those are the inputs that drive this total.</p>
-                    <p style="margin: 8px 0;">Note: net worth is a <em>snapshot</em> — it reflects today's balances. The retirement projections (chart and table above) model how the portfolio grows and gets drawn down over time, but they don't project changes in property values or mortgage paydown into the future net worth display.</p>
+                    <p style="margin: 8px 0;">This is a <strong>full household</strong> view — it includes 100% of every jointly owned asset. The sidebar breaks it down line by line so each component can be verified against account statements. If any number looks off, the property values and balances in the sections above are the inputs that drive the total.</p>
+                    <p style="margin: 8px 0;">Net worth is a <em>point-in-time snapshot</em> based on today's balances. The retirement projections (chart and scenario table) model how the portfolio grows and gets drawn down over time, but they do not project future changes in property values or mortgage paydown into the net worth display.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">⚙️ Key Assumptions You Can Adjust</h4>
-                    <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — professionally managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (default 6% — conservative; the long-term stock market average is 7-10% but this accounts for a balanced portfolio), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: management fee (8%) is what you pay, vacancy (3%) reflects Eugene's low turnover, and maintenance (0.5%) is realistic for well-kept properties. Try setting management to 0% to see the self-managing upside, or bump vacancy to 8% to stress-test a rough year. Small changes in these rates compound significantly over 20-30 years.</p>
+                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">⚙️ Key Assumptions to Review</h4>
+                    <p>Every number in this dashboard can be adjusted. The defaults are calibrated to current conditions. The most impactful ones to review:</p>
+                    <p style="margin: 8px 0;"><strong>Portfolio growth rate</strong> (default 6%) — conservative estimate for a balanced portfolio. The historical S&amp;P 500 average is higher (7-10%), but 6% provides a margin of safety. Adjust upward for a more aggressive allocation, or downward to stress-test.</p>
+                    <p style="margin: 8px 0;"><strong>Inflation rate</strong> (default 3%) — slightly above the Fed's 2% target. This compounds expenses over time: at 3%, today's $100K in annual expenses becomes ~$180K in 20 years.</p>
+                    <p style="margin: 8px 0;"><strong>Retirement ages</strong> — earlier retirement means fewer years of contributions, more years of withdrawals, and a reduced PERS pension. Each year earlier has a compounding effect.</p>
+                    <p style="margin: 8px 0;"><strong>Rental assumptions</strong> — management fee (8%) reflects the current property manager cost, vacancy (3%) reflects Eugene's strong rental market, and maintenance (0.5%) covers routine upkeep. Set management to 0% to model self-managing, or bump vacancy to 8% to stress-test a rough stretch.</p>
+                    <p style="margin: 8px 0;">Small changes in any of these rates compound significantly over 20-30 years.</p>
                 </div>
 
                 <div style="padding: 12px; background: var(--accent-light); border-radius: 8px; border-left: 3px solid #4facfe; font-size: 0.8rem;">
-                    <strong>A note on precision:</strong> This dashboard is a planning tool, not a tax calculator. Real taxes depend on deductions, brackets, filing status, and many other factors that change yearly. The rates here are effective-rate estimates to give you a realistic picture of take-home income. For exact tax planning, consult a tax professional — but these numbers should get you within a reasonable ballpark for retirement planning purposes.
+                    <strong>A note on precision:</strong> This dashboard is a planning tool, not a tax calculator. Real taxes depend on deductions, brackets, filing status, and many other factors that change yearly. The rates used here are effective-rate estimates designed to give a realistic picture of take-home income. For exact tax planning, a tax professional should be consulted — but these numbers should be within a reasonable ballpark for retirement planning purposes.
                 </div>
             </div>
         </div>
