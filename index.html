@@ -652,6 +652,7 @@
             font-weight: 600;
             color: #fff;
         }
+        .bar-salary { background: #22c55e; }
         .bar-pension { background: #fbbf24; }
         .bar-portfolio { background: #4facfe; }
         .bar-ss { background: #a78bfa; }
@@ -1215,6 +1216,32 @@
                     </div>
                     <div class="helper-text">
                         Currently 36 → retires in <span id="travisYearsToRetire">24</span> years (year <span id="travisRetireYear">2050</span>)
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-subtitle">💰 Current Salaries</div>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Mike's Salary</span>
+                        <span class="info-tip">?<span class="tooltip">Mike's current gross annual salary. Used to show working income in the income vs. expenses comparison. Grows with the salary growth rate below.</span></span>
+                    </div>
+                    <div class="number-input-group">
+                        <span class="currency-prefix">$</span>
+                        <input type="number" id="mikeSalary" min="0" max="500000" step="5000" value="170000">
+                        <span class="input-suffix">/year</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Travis's Salary</span>
+                        <span class="info-tip">?<span class="tooltip">Travis's current gross annual salary (LRAPA). Also used for PERS pension calculations. Grows with the salary growth rate below.</span></span>
+                    </div>
+                    <div class="number-input-group">
+                        <span class="currency-prefix">$</span>
+                        <input type="number" id="travisSalary" min="0" max="500000" step="5000" value="152000">
+                        <span class="input-suffix">/year</span>
                     </div>
                 </div>
             </div>
@@ -1993,7 +2020,8 @@
             currentYear: 2026,
             // PERS parameters
             persStartYear: 2022.75,
-            currentSalary: 152000,
+            currentSalary: 152000,  // Travis (also used for PERS calc)
+            mikeSalary: 170000,     // Mike (Peacehealth)
             persMultiplier: 0.015,
             // Ownership share of rentals (50/50 with Mike)
             rentalOwnership: 1.00,  // Full household view (Mike + Travis together)
@@ -2783,6 +2811,8 @@
             return {
                 mikeRetireAge: parseInt(document.getElementById('mikeRetireAge').value) || 62,
                 travisRetireAge: parseInt(document.getElementById('travisRetireAge').value) || 62,
+                mikeSalary: parseFloat(document.getElementById('mikeSalary').value) || 0,
+                travisSalary: parseFloat(document.getElementById('travisSalary').value) || 0,
                 mikeContrib: parseFloat(document.getElementById('mikeContrib').value) || 0,
                 travisContrib: parseFloat(document.getElementById('travisContrib').value) || 0,
                 // Multiple contribution changes (up to 5)
@@ -2936,6 +2966,17 @@
                     ssIncome = ssGross - (ssGross * 0.85 * v.federalTaxRate);
                 }
 
+                // === WORKING INCOME (salary for anyone still employed) ===
+                let workingIncome = 0;
+                if (!mikeRetired) {
+                    const mikeSalaryGrown = v.mikeSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
+                    workingIncome += mikeSalaryGrown * (1 - combinedRate);
+                }
+                if (!travisRetired) {
+                    const travisSalaryGrown = v.travisSalary * Math.pow(1 + v.salaryGrowth, yearsFromNow);
+                    workingIncome += travisSalaryGrown * (1 - combinedRate);
+                }
+
                 // === EXPENSE BREAKDOWN ===
                 const inflationFactor = Math.pow(1 + v.inflationRate, yearsFromNow);
 
@@ -2963,7 +3004,7 @@
 
                 let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense;
 
-                const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome;
+                const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome + workingIncome;
                 const surplus = totalIncome - expenses;
 
                 phases.push({
@@ -2979,6 +3020,7 @@
                     ssIncome,
                     rentalIncome,
                     rentalSaleProceeds,
+                    workingIncome,
                     totalIncome,
                     expenses,
                     surplus,
@@ -3007,12 +3049,12 @@
                     <td>${p.yearsFromNow} yrs</td>
                     <td>${formatCurrency(p.portfolio)}</td>
                     <td style="font-size: 0.7rem;">
+                        ${p.workingIncome > 0 ? `<span style="color:#22c55e">Salary: ${formatCurrency(p.workingIncome)}</span><br>` : ''}
                         ${p.pension > 0 ? `PERS: ${formatCurrency(p.pension)}${p.pensionReduction ? `<br><span style="color:#f87171;font-size:0.6rem">${p.pensionReduction}</span>` : ''}<br>` : ''}
                         ${p.portfolioIncome > 0 ? `Port: ${formatCurrency(p.portfolioIncome)}<br>` : ''}
                         ${p.ssIncome > 0 ? `SS: ${formatCurrency(p.ssIncome)}<br>` : ''}
                         ${p.rentalIncome !== undefined ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
                         ${p.rentalSaleProceeds > 0 ? `<br><span style="color:#fbbf24;font-size:0.6rem">+Sale: ${formatCurrency(p.rentalSaleProceeds)}</span>` : ''}
-                        ${p.totalIncome === 0 ? '<span style="color:var(--text-secondary)">Still working</span>' : ''}
                     </td>
                     <td>
                         ${p.totalIncome > 0 || p.rentalIncome !== 0 ? `
@@ -3223,7 +3265,8 @@
 
             // === INCOME BAR ===
             const rentalIncome = Math.max(0, phase.rentalIncome || 0);
-            const totalIncome = phase.pension + phase.portfolioIncome + phase.ssIncome + rentalIncome;
+            const salaryIncome = phase.workingIncome || 0;
+            const totalIncome = phase.pension + phase.portfolioIncome + phase.ssIncome + rentalIncome + salaryIncome;
 
             const incomeBar = document.getElementById('incomeBar');
             const incomeLegend = document.getElementById('incomeLegend');
@@ -3236,12 +3279,14 @@
             } else {
                 if (incomeTotal) incomeTotal.textContent = formatCurrency(totalIncome);
 
+                const salaryPct = (salaryIncome / totalIncome) * 100;
                 const pensionPct = (phase.pension / totalIncome) * 100;
                 const portfolioPct = (phase.portfolioIncome / totalIncome) * 100;
                 const ssPct = (phase.ssIncome / totalIncome) * 100;
                 const rentalPct = (rentalIncome / totalIncome) * 100;
 
                 incomeBar.innerHTML = `
+                    ${salaryPct > 0 ? `<div class="bar-salary" style="width:${salaryPct}%">${salaryPct > 10 ? 'Salary' : ''}</div>` : ''}
                     ${pensionPct > 0 ? `<div class="bar-pension" style="width:${pensionPct}%">${pensionPct > 10 ? 'PERS' : ''}</div>` : ''}
                     ${portfolioPct > 0 ? `<div class="bar-portfolio" style="width:${portfolioPct}%">${portfolioPct > 10 ? 'Portfolio' : ''}</div>` : ''}
                     ${ssPct > 0 ? `<div class="bar-ss" style="width:${ssPct}%">${ssPct > 10 ? 'SS' : ''}</div>` : ''}
@@ -3249,13 +3294,15 @@
                 `;
 
                 const v = getInputValues();
-                incomeLegend.innerHTML = `
-                    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS: ${formatCurrency(phase.pension)} (${pensionPct.toFixed(0)}%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#4facfe"></div>Portfolio (${(v.withdrawalRate * 100).toFixed(1)}%): ${formatCurrency(phase.portfolioIncome)} (${portfolioPct.toFixed(0)}%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>SS: ${formatCurrency(phase.ssIncome)} (${ssPct.toFixed(0)}%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Rental: ${formatCurrency(rentalIncome)} (${rentalPct.toFixed(0)}%)</div>
-                    <div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(totalIncome)}/yr</strong></div>
-                `;
+                // Build income legend — only show non-zero items
+                let incomeLegendItems = [];
+                if (salaryIncome > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Salary: ${formatCurrency(salaryIncome)} (${salaryPct.toFixed(0)}%)</div>`);
+                if (phase.pension > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS: ${formatCurrency(phase.pension)} (${pensionPct.toFixed(0)}%)</div>`);
+                if (phase.portfolioIncome > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#4facfe"></div>Portfolio (${(v.withdrawalRate * 100).toFixed(1)}%): ${formatCurrency(phase.portfolioIncome)} (${portfolioPct.toFixed(0)}%)</div>`);
+                if (phase.ssIncome > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>SS: ${formatCurrency(phase.ssIncome)} (${ssPct.toFixed(0)}%)</div>`);
+                if (rentalIncome > 0) incomeLegendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Rental: ${formatCurrency(rentalIncome)} (${rentalPct.toFixed(0)}%)</div>`);
+                incomeLegendItems.push(`<div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(totalIncome)}/yr</strong></div>`);
+                incomeLegend.innerHTML = incomeLegendItems.join('');
             }
 
             // === EXPENSE BAR ===
