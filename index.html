@@ -664,6 +664,100 @@
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
+        /* Phase Tabs */
+        .phase-tabs {
+            display: flex;
+            gap: 4px;
+            margin: 10px 0 15px 0;
+            flex-wrap: wrap;
+        }
+        .phase-tab {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .phase-tab:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .phase-tab.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* Expense Bar */
+        .expense-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .expense-bar div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .bar-mortgage { background: #ef4444; }
+        .bar-taxins { background: #f97316; }
+        .bar-healthcare { background: #ec4899; }
+        .bar-living { background: #8b5cf6; }
+        .bar-onetime { background: #6366f1; }
+
+        /* Bar Row Labels */
+        .bar-row-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 12px;
+        }
+        .bar-row-label span {
+            color: var(--text-primary);
+        }
+
+        /* Expense Legend */
+        .expense-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+        }
+
+        /* Bar Wrapper (proportional scaling) */
+        #incomeBarWrapper, #expenseBarWrapper {
+            transition: width 0.3s ease;
+        }
+
+        /* Surplus/Deficit Indicator */
+        .surplus-indicator {
+            margin-top: 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .surplus-indicator.surplus {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .surplus-indicator.deficit {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -761,6 +855,10 @@
 
             /* Income breakdown: smaller text */
             .income-legend { font-size: 0.7rem; }
+            .expense-legend { font-size: 0.7rem; }
+            .phase-tabs { gap: 3px; }
+            .phase-tab { padding: 5px 8px; font-size: 0.65rem; }
+            .surplus-indicator { font-size: 0.75rem; padding: 6px 10px; }
 
             /* Collapsible sections */
             .collapsible-header { padding: 12px 15px; }
@@ -1643,13 +1741,21 @@
             📋 Detailed analysis
         </div>
 
-        <!-- Income Breakdown Bar -->
+        <!-- Income & Expense Breakdown -->
         <div class="income-breakdown">
             <div class="result-title" style="color: #fbbf24;">💵 Income vs. Expenses at Retirement <span id="incomeBreakdownSubtitle" style="font-size:0.8rem;color:var(--text-secondary);">(when both retired)</span></div>
-            <div id="incomeBarContainer">
+            <div class="phase-tabs" id="phaseTabs"></div>
+            <div class="bar-row-label">Income: <span id="incomeTotal"></span>/yr</div>
+            <div id="incomeBarWrapper">
                 <div class="income-bar" id="incomeBar"></div>
             </div>
             <div class="income-legend" id="incomeLegend"></div>
+            <div class="bar-row-label">Expenses: <span id="expenseTotal"></span>/yr</div>
+            <div id="expenseBarWrapper">
+                <div class="expense-bar" id="expenseBar"></div>
+            </div>
+            <div class="expense-legend" id="expenseLegend"></div>
+            <div class="surplus-indicator" id="surplusIndicator"></div>
         </div>
 
         <!-- Scenario Detail Table -->
@@ -1757,6 +1863,16 @@
                     </p>
                     <p style="margin: 8px 0;">This is a <strong>full household</strong> view — it includes 100% of every jointly owned asset. The sidebar breaks it down line by line so each component can be verified against account statements. If any number looks off, the property values and balances in the sections above are the inputs that drive the total.</p>
                     <p style="margin: 8px 0;">Net worth is a <em>point-in-time snapshot</em> based on today's balances. The retirement projections (chart and scenario table) model how the portfolio grows and gets drawn down over time, but they do not project future changes in property values or mortgage paydown into the net worth display.</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">📊 Expense Breakdown Categories</h4>
+                    <p>The annual household expenses of $113,598 are decomposed into categories that evolve over time. Click the phase tabs in the "Income vs. Expenses" section above to see how each category changes at different retirement milestones.</p>
+                    <p style="margin: 8px 0;"><strong>Mortgage P&amp;I ($13,772/yr)</strong> — the principal and interest portion of the home mortgage payment. This is a fixed nominal amount that does not increase with inflation. It drops to $0 when the mortgage is paid off (around 2050, or sooner with extra payments). This is one of the most impactful transitions in retirement expenses.</p>
+                    <p style="margin: 8px 0;"><strong>Property Tax &amp; Insurance ($6,871/yr)</strong> — property tax ($6,094) and homeowners insurance ($777) on the primary residence. These grow with inflation and continue even after the mortgage is paid off.</p>
+                    <p style="margin: 8px 0;"><strong>Living Expenses ($92,955/yr)</strong> — everything else: food, utilities, transportation, entertainment, subscriptions, and so on. The retirement expense reduction slider (default 15%) applies only to this category — mortgage and property costs are fixed obligations that cannot be reduced by lifestyle adjustments. After the 15% reduction, this starts at ~$79,012/yr and grows with inflation.</p>
+                    <p style="margin: 8px 0;"><strong>Healthcare ($15,000/person/yr)</strong> — estimated cost of health insurance premiums and out-of-pocket medical costs for each retired person before age 65. Once Medicare eligibility kicks in at 65, this cost drops to $0. This category only appears during the gap between retirement and Medicare.</p>
+                    <p style="margin: 8px 0;"><strong>One-time Retirement Expenses</strong> — a lump sum (default $50,000) spread over the first 5 years of full retirement ($10,000/yr). Covers deferred home projects, travel, or other transition costs that often arise when entering retirement.</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -2699,6 +2815,22 @@
             const phases = [];
             const baseRetirementExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
 
+            // Decompose base expenses into categories for breakdown display
+            const baseMortgagePI = baseData.primaryResidence.mortgagePI * 12;
+            const baseTaxInsurance = baseData.primaryResidence.propertyTax + baseData.primaryResidence.insurance;
+            const baseLivingExpenses = baseData.annualExpenses - baseMortgagePI - baseTaxInsurance;
+            const retiredLivingExpenses = baseLivingExpenses * (1 - v.expenseReduction);
+
+            // Calculate home mortgage payoff year for expense breakdown
+            const homeExtraPrincipalForPayoff = parseFloat(document.getElementById('homeExtraPrincipal').value) || 0;
+            const homePayoffYear = calculateMortgagePayoff(
+                baseData.primaryResidence.mortgageBalance,
+                baseData.primaryResidence.mortgagePI,
+                baseData.primaryResidence.mortgageRate,
+                homeExtraPrincipalForPayoff,
+                baseData.currentYear
+            );
+
             // Determine key milestones
             const persCollectionAge = Math.max(v.travisRetireAge, 55);
             const persCollectionYear = baseData.currentYear + (persCollectionAge - baseData.travisAge);
@@ -2804,28 +2936,32 @@
                     ssIncome = ssGross - (ssGross * 0.85 * v.federalTaxRate);
                 }
 
-                // Expenses (inflation adjusted)
-                let expenses = baseRetirementExpenses * Math.pow(1 + v.inflationRate, yearsFromNow);
+                // === EXPENSE BREAKDOWN ===
+                const inflationFactor = Math.pow(1 + v.inflationRate, yearsFromNow);
 
-                // Add healthcare costs for each retired person before Medicare (65)
-                // Healthcare cost input is per-person
-                let healthcareNeeded = 0;
-                if (mikeRetired && mikeAge < 65) healthcareNeeded += v.healthcareCost;
-                if (travisRetired && travisAge < 65) healthcareNeeded += v.healthcareCost;
-                expenses += healthcareNeeded;
+                // Mortgage P&I: fixed nominal (not inflation-adjusted), drops to $0 at payoff
+                const mortgageExpense = (year < homePayoffYear) ? baseMortgagePI : 0;
 
-                // Subtract mortgage savings when home mortgage is paid off
-                // (mortgage is already included in base expenses)
-                const mortgageSavings = calculateMortgageSavings(year);
-                expenses -= mortgageSavings;
+                // Property tax & insurance: grows with inflation
+                const taxInsExpense = baseTaxInsurance * inflationFactor;
 
-                // Add one-time expenses in first year of full retirement
+                // Living expenses: retirement-reduced, inflation-adjusted
+                const livingExpense = retiredLivingExpenses * inflationFactor;
+
+                // Healthcare: per-person pre-Medicare (65)
+                let healthcareExpense = 0;
+                if (mikeRetired && mikeAge < 65) healthcareExpense += v.healthcareCost;
+                if (travisRetired && travisAge < 65) healthcareExpense += v.healthcareCost;
+
+                // One-time expenses in first phase of full retirement
+                let oneTimeExpense = 0;
                 const prevPhaseYear = phasePoints[idx - 1];
                 const prevBothRetired = (prevPhaseYear > mikeRetireYear) && (prevPhaseYear > travisRetireYear);
                 if (bothRetired && !prevBothRetired) {
-                    // This is first phase of full retirement - spread one-time over ~5 years
-                    expenses += v.oneTimeExpenses / 5;
+                    oneTimeExpense = v.oneTimeExpenses / 5;
                 }
+
+                let expenses = mortgageExpense + taxInsExpense + livingExpense + healthcareExpense + oneTimeExpense;
 
                 const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome;
                 const surplus = totalIncome - expenses;
@@ -2846,7 +2982,14 @@
                     totalIncome,
                     expenses,
                     surplus,
-                    status: surplus >= 0 ? 'yes' : (surplus >= -expenses * 0.2 ? 'maybe' : 'no')
+                    status: surplus >= 0 ? 'yes' : (surplus >= -expenses * 0.2 ? 'maybe' : 'no'),
+                    expenseBreakdown: {
+                        mortgage: mortgageExpense,
+                        taxInsurance: taxInsExpense,
+                        living: livingExpense,
+                        healthcare: healthcareExpense,
+                        oneTime: oneTimeExpense
+                    }
                 });
             });
 
@@ -3029,61 +3172,153 @@
             });
         }
 
+        // Global state for phase selection
+        let currentPhases = [];
+        let selectedPhaseIdx = -1; // -1 = auto-select full retirement
+
+        function getActivePhaseIndex(phases) {
+            if (selectedPhaseIdx >= 0 && selectedPhaseIdx < phases.length) {
+                return selectedPhaseIdx;
+            }
+            // Auto-select: find first phase where both are retired (pension + portfolio)
+            const fullRetireIdx = phases.findIndex(p => p.pension > 0 && p.portfolioIncome > 0);
+            return fullRetireIdx >= 0 ? fullRetireIdx : phases.length - 1;
+        }
+
+        function selectPhase(idx) {
+            selectedPhaseIdx = idx;
+            renderPhaseTabs(currentPhases);
+            renderIncomeExpenseBars(currentPhases);
+        }
+
+        function renderPhaseTabs(phases) {
+            const container = document.getElementById('phaseTabs');
+            if (!container || phases.length === 0) return;
+
+            const activeIdx = getActivePhaseIndex(phases);
+
+            container.innerHTML = phases.map((p, i) =>
+                `<button class="phase-tab${i === activeIdx ? ' active' : ''}" onclick="selectPhase(${i})">${p.label}</button>`
+            ).join('');
+        }
+
         function renderIncomeBar(phases) {
-            // Find the phase where BOTH people have retired (full retirement)
-            // Need to find a phase where both pension > 0 and portfolioIncome > 0
-            // OR the last phase if that has income
-            let fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
+            currentPhases = phases;
+            selectedPhaseIdx = -1; // Reset to auto on each full update
+            renderPhaseTabs(phases);
+            renderIncomeExpenseBars(phases);
+        }
 
-            // If no phase has both, check if the last phase has any income
-            if (!fullRetirePhase) {
-                fullRetirePhase = phases[phases.length - 1];
+        function renderIncomeExpenseBars(phases) {
+            const activeIdx = getActivePhaseIndex(phases);
+            const phase = phases[activeIdx];
+
+            if (!phase) return;
+
+            // Update subtitle
+            const subtitle = document.getElementById('incomeBreakdownSubtitle');
+            if (subtitle) {
+                subtitle.textContent = `(Mike ${phase.mikeAge} / Travis ${phase.travisAge})`;
             }
 
-            if (!fullRetirePhase || fullRetirePhase.totalIncome === 0) {
-                document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">Select retirement ages to see income breakdown</div>';
-                document.getElementById('incomeLegend').innerHTML = '';
-                document.getElementById('incomeBreakdownSubtitle').textContent = '(when both retired)';
-                return;
+            // === INCOME BAR ===
+            const rentalIncome = Math.max(0, phase.rentalIncome || 0);
+            const totalIncome = phase.pension + phase.portfolioIncome + phase.ssIncome + rentalIncome;
+
+            const incomeBar = document.getElementById('incomeBar');
+            const incomeLegend = document.getElementById('incomeLegend');
+            const incomeTotal = document.getElementById('incomeTotal');
+
+            if (totalIncome <= 0) {
+                if (incomeTotal) incomeTotal.textContent = '$0';
+                incomeBar.innerHTML = '<div style="width:100%;background:var(--bg-tertiary);color:var(--text-muted);font-size:0.8rem;">No income sources active yet</div>';
+                incomeLegend.innerHTML = '';
+            } else {
+                if (incomeTotal) incomeTotal.textContent = formatCurrency(totalIncome);
+
+                const pensionPct = (phase.pension / totalIncome) * 100;
+                const portfolioPct = (phase.portfolioIncome / totalIncome) * 100;
+                const ssPct = (phase.ssIncome / totalIncome) * 100;
+                const rentalPct = (rentalIncome / totalIncome) * 100;
+
+                incomeBar.innerHTML = `
+                    ${pensionPct > 0 ? `<div class="bar-pension" style="width:${pensionPct}%">${pensionPct > 10 ? 'PERS' : ''}</div>` : ''}
+                    ${portfolioPct > 0 ? `<div class="bar-portfolio" style="width:${portfolioPct}%">${portfolioPct > 10 ? 'Portfolio' : ''}</div>` : ''}
+                    ${ssPct > 0 ? `<div class="bar-ss" style="width:${ssPct}%">${ssPct > 10 ? 'SS' : ''}</div>` : ''}
+                    ${rentalPct > 0 ? `<div class="bar-rental" style="width:${rentalPct}%">${rentalPct > 10 ? 'Rental' : ''}</div>` : ''}
+                `;
+
+                const v = getInputValues();
+                incomeLegend.innerHTML = `
+                    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS: ${formatCurrency(phase.pension)} (${pensionPct.toFixed(0)}%)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#4facfe"></div>Portfolio (${(v.withdrawalRate * 100).toFixed(1)}%): ${formatCurrency(phase.portfolioIncome)} (${portfolioPct.toFixed(0)}%)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>SS: ${formatCurrency(phase.ssIncome)} (${ssPct.toFixed(0)}%)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Rental: ${formatCurrency(rentalIncome)} (${rentalPct.toFixed(0)}%)</div>
+                    <div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(totalIncome)}/yr</strong></div>
+                `;
             }
 
-            // Include rental income in total (use 0 if negative or undefined)
-            const rentalIncome = Math.max(0, fullRetirePhase.rentalIncome || 0);
-            const total = fullRetirePhase.pension + fullRetirePhase.portfolioIncome + fullRetirePhase.ssIncome + rentalIncome;
+            // === EXPENSE BAR ===
+            const eb = phase.expenseBreakdown;
+            const totalExpenses = phase.expenses;
+            const expenseBar = document.getElementById('expenseBar');
+            const expenseLegend = document.getElementById('expenseLegend');
+            const expenseTotal = document.getElementById('expenseTotal');
 
-            // Handle edge case where total is 0 or very small
-            if (total <= 0) {
-                document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">No income sources active yet</div>';
-                document.getElementById('incomeLegend').innerHTML = '';
-                document.getElementById('incomeBreakdownSubtitle').textContent = '(when both retired)';
-                return;
+            if (expenseTotal) expenseTotal.textContent = formatCurrency(totalExpenses);
+
+            if (!eb || totalExpenses <= 0) {
+                expenseBar.innerHTML = '<div style="width:100%;background:var(--bg-tertiary);color:var(--text-muted);font-size:0.8rem;">No expenses</div>';
+                expenseLegend.innerHTML = '';
+            } else {
+                const mortgagePct = (eb.mortgage / totalExpenses) * 100;
+                const taxInsPct = (eb.taxInsurance / totalExpenses) * 100;
+                const livingPct = (eb.living / totalExpenses) * 100;
+                const healthcarePct = (eb.healthcare / totalExpenses) * 100;
+                const oneTimePct = (eb.oneTime / totalExpenses) * 100;
+
+                expenseBar.innerHTML = `
+                    ${mortgagePct > 0 ? `<div class="bar-mortgage" style="width:${mortgagePct}%">${mortgagePct > 8 ? 'Mortgage' : ''}</div>` : ''}
+                    ${taxInsPct > 0 ? `<div class="bar-taxins" style="width:${taxInsPct}%">${taxInsPct > 8 ? 'Tax+Ins' : ''}</div>` : ''}
+                    ${livingPct > 0 ? `<div class="bar-living" style="width:${livingPct}%">${livingPct > 10 ? 'Living' : ''}</div>` : ''}
+                    ${healthcarePct > 0 ? `<div class="bar-healthcare" style="width:${healthcarePct}%">${healthcarePct > 8 ? 'Healthcare' : ''}</div>` : ''}
+                    ${oneTimePct > 0 ? `<div class="bar-onetime" style="width:${oneTimePct}%">${oneTimePct > 8 ? 'One-time' : ''}</div>` : ''}
+                `;
+
+                // Build legend — only show non-zero categories
+                let legendItems = [];
+                if (eb.mortgage > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Mortgage P&I: ${formatCurrency(eb.mortgage)} (${mortgagePct.toFixed(0)}%)</div>`);
+                if (eb.taxInsurance > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Tax & Ins: ${formatCurrency(eb.taxInsurance)} (${taxInsPct.toFixed(0)}%)</div>`);
+                legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Living: ${formatCurrency(eb.living)} (${livingPct.toFixed(0)}%)</div>`);
+                if (eb.healthcare > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Healthcare: ${formatCurrency(eb.healthcare)} (${healthcarePct.toFixed(0)}%)</div>`);
+                if (eb.oneTime > 0) legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>One-time: ${formatCurrency(eb.oneTime)} (${oneTimePct.toFixed(0)}%)</div>`);
+                legendItems.push(`<div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(totalExpenses)}/yr</strong></div>`);
+
+                expenseLegend.innerHTML = legendItems.join('');
             }
 
-            const pensionPct = (fullRetirePhase.pension / total) * 100;
-            const portfolioPct = (fullRetirePhase.portfolioIncome / total) * 100;
-            const ssPct = (fullRetirePhase.ssIncome / total) * 100;
-            const rentalPct = (rentalIncome / total) * 100;
+            // === PROPORTIONAL BAR SCALING ===
+            const max = Math.max(totalIncome, totalExpenses);
+            const incomeBarWrapper = document.getElementById('incomeBarWrapper');
+            const expenseBarWrapper = document.getElementById('expenseBarWrapper');
+            if (incomeBarWrapper && max > 0) incomeBarWrapper.style.width = ((totalIncome / max) * 100) + '%';
+            if (expenseBarWrapper && max > 0) expenseBarWrapper.style.width = ((totalExpenses / max) * 100) + '%';
 
-            document.getElementById('incomeBar').innerHTML = `
-                ${pensionPct > 0 ? `<div class="bar-pension" style="width:${pensionPct}%">${pensionPct > 10 ? 'PERS' : ''}</div>` : ''}
-                ${portfolioPct > 0 ? `<div class="bar-portfolio" style="width:${portfolioPct}%">${portfolioPct > 10 ? 'Portfolio' : ''}</div>` : ''}
-                ${ssPct > 0 ? `<div class="bar-ss" style="width:${ssPct}%">${ssPct > 10 ? 'SS' : ''}</div>` : ''}
-                ${rentalPct > 0 ? `<div class="bar-rental" style="width:${rentalPct}%">${rentalPct > 10 ? 'Rental' : ''}</div>` : ''}
-            `;
-
-            // Show which phase this represents
-            const phaseLabel = fullRetirePhase.label || `Year ${fullRetirePhase.year}`;
-
-            // Update subtitle to show what phase this represents
-            document.getElementById('incomeBreakdownSubtitle').textContent = `(Mike ${fullRetirePhase.mikeAge} / Travis ${fullRetirePhase.travisAge})`;
-
-            document.getElementById('incomeLegend').innerHTML = `
-                <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>PERS Pension: ${formatCurrency(fullRetirePhase.pension)} (${pensionPct.toFixed(0)}%)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#4facfe"></div>Portfolio (${(getInputValues().withdrawalRate * 100).toFixed(1)}%): ${formatCurrency(fullRetirePhase.portfolioIncome)} (${portfolioPct.toFixed(0)}%)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Social Security: ${formatCurrency(fullRetirePhase.ssIncome)} (${ssPct.toFixed(0)}%)</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div>Rental Income: ${formatCurrency(rentalIncome)} (${rentalPct.toFixed(0)}%)</div>
-                <div class="legend-item" style="margin-left:auto;"><strong>Total: ${formatCurrency(total)}/yr</strong></div>
-            `;
+            // === SURPLUS / DEFICIT INDICATOR ===
+            const surplusEl = document.getElementById('surplusIndicator');
+            if (surplusEl) {
+                const surplus = phase.surplus;
+                if (totalIncome <= 0 && totalExpenses <= 0) {
+                    surplusEl.innerHTML = '';
+                    surplusEl.className = 'surplus-indicator';
+                } else if (surplus >= 0) {
+                    surplusEl.innerHTML = `+${formatCurrency(surplus)}/yr surplus`;
+                    surplusEl.className = 'surplus-indicator surplus';
+                } else {
+                    surplusEl.innerHTML = `${formatCurrency(surplus)}/yr shortfall`;
+                    surplusEl.className = 'surplus-indicator deficit';
+                }
+            }
         }
 
         function updateDisplays() {
