@@ -1382,10 +1382,10 @@
                 <div class="control-group">
                     <div class="control-label">
                         <span>Property Management Fee</span>
-                        <span class="info-tip">?<span class="tooltip">Fee paid to a property manager (% of gross rent). 8-10% is typical if hiring one. You currently self-manage both properties, so this defaults to 0%. If you're planning for retirement or want to model handing off management, try 8-10% to see the impact.</span></span>
+                        <span class="info-tip">?<span class="tooltip">Fee paid to your property manager (% of gross rent). You currently pay 8%. Set to 0% to see how much you'd save by self-managing. 10% is typical for full-service management.</span></span>
                     </div>
                     <div class="input-group">
-                        <input type="number" id="propMgmtFee" min="0" max="12" step="1" value="0">
+                        <input type="number" id="propMgmtFee" min="0" max="12" step="1" value="8">
                         <span class="unit">%</span>
                     </div>
                 </div>
@@ -1517,7 +1517,7 @@
             </div>
 
             <div class="note-box warning">
-                <strong>💡 How net income is calculated:</strong> Gross rent minus vacancy allowance, maintenance reserve, property tax, insurance, and mortgage P&I. Management fee and vacancy default to your actual situation (self-managed, Eugene's low-vacancy market). Danebo includes a $228/mo furnace loan until 2029. To stress-test, try bumping vacancy to 8% and adding 8-10% management — this shows the impact if you hire a manager or hit a rough patch. After mortgage payoff, net income jumps significantly.
+                <strong>💡 How net income is calculated:</strong> Gross rent minus vacancy allowance, 8% management fee, maintenance reserve, property tax, insurance, and mortgage P&I. Danebo includes a $228/mo furnace loan until 2029. To stress-test, try bumping vacancy to 8% or setting management to 0% to see the self-managing upside. After mortgage payoff, net income jumps significantly.
             </div>
             </div>
         </div>
@@ -1705,7 +1705,7 @@
                     <p style="margin: 8px 0; padding: 10px; background: var(--accent-light); border-radius: 8px; font-family: monospace; font-size: 0.8rem;">
                         Rent collected<br>
                         &minus; Vacancy loss (default 3% — ~11 days/year, reflects Eugene's strong rental market)<br>
-                        &minus; Property management fee (default 0% — you self-manage; set to 8-10% to model hiring a manager)<br>
+                        &minus; Property management fee (default 8% — what you pay your manager; set to 0% to model self-managing)<br>
                         &minus; Maintenance reserve (default 0.5% of property value/year — ~$2K/property for routine upkeep)<br>
                         &minus; Property tax (increases ~2% per year)<br>
                         &minus; Insurance (increases ~2% per year)<br>
@@ -1713,8 +1713,8 @@
                         &minus; Any special loans (e.g., Danebo's furnace loan through 2029)<br>
                         = <strong>Net rental income</strong>
                     </p>
-                    <p style="margin: 8px 0;">With the defaults tuned to your actual situation (self-managed, low vacancy), both properties show <strong>positive cash flow</strong> — which matches what you see in your bank account. The dashboard nets these as income in retirement projections, taxed at the combined ~26% rate when positive.</p>
-                    <p style="margin: 8px 0;"><strong>Stress-testing:</strong> To see the worst-case scenario, try bumping vacancy to 8% (about a month empty per year) and adding an 8% management fee (if you hired a property manager). This shows how much cushion your rental income has — and whether the properties would still be worth holding in a tighter market or after you stop self-managing.</p>
+                    <p style="margin: 8px 0;">With the defaults tuned to your actual situation (8% management fee, low vacancy in Eugene), the numbers should closely match what you see in your bank account. The dashboard nets rental income into retirement projections, taxed at the combined ~26% rate when positive.</p>
+                    <p style="margin: 8px 0;"><strong>Stress-testing:</strong> Try bumping vacancy to 8% to simulate a rough year with a month empty between tenants. Or set management to 0% to see how much you'd save by self-managing. These levers show how much cushion your rental income has.</p>
                     <p style="margin: 8px 0;">If a property shows <strong>negative</strong> in a stress test, it means the rent wouldn't fully cover costs under those conditions. In reality, rental losses can often be <strong>written off against your other income</strong> on your tax return (up to $25K/year for active participants). The dashboard doesn't model that tax benefit, so your actual situation would be slightly better than shown.</p>
                     <p style="margin: 8px 0;"><strong>Why rentals improve over time:</strong> Once the mortgage is paid off, the biggest expense disappears and the property flips to strongly positive cash flow. Rent also increases each year while the mortgage payment stays fixed — the gap widens in your favor every year.</p>
                 </div>
@@ -1731,7 +1731,7 @@
 
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">⚙️ Key Assumptions You Can Adjust</h4>
-                    <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — self-managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (7% is a common long-term stock market average), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: vacancy (3%) and maintenance (0.5%) reflect your current reality; management fee (0%) reflects self-managing. Crank these up to stress-test — especially management fee if you're thinking about hiring a manager in retirement. Small changes in these rates compound significantly over 20-30 years.</p>
+                    <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — professionally managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (7% is a common long-term stock market average), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: management fee (8%) is what you pay, vacancy (3%) reflects Eugene's low turnover, and maintenance (0.5%) is realistic for well-kept properties. Try setting management to 0% to see the self-managing upside, or bump vacancy to 8% to stress-test a rough year. Small changes in these rates compound significantly over 20-30 years.</p>
                 </div>
 
                 <div style="padding: 12px; background: var(--accent-light); border-radius: 8px; border-left: 3px solid #4facfe; font-size: 0.8rem;">
