@@ -1036,36 +1036,44 @@
                         <div class="person-name" style="color:#c084fc;">📊 Net Worth Summary</div>
                         <div class="account-list">
                             <div class="account-item">
-                                <span class="account-name">Retirement Accounts</span>
-                                <span class="account-value">$334,088</span>
+                                <span class="account-name">Retirement + PERS IAP</span>
+                                <span class="account-value" id="nwRetirement">$0</span>
                             </div>
                             <div class="account-item">
                                 <span class="account-name">Brokerage Investments</span>
-                                <span class="account-value">$148,695</span>
+                                <span class="account-value" id="nwBrokerage">$0</span>
                             </div>
                             <div class="account-item">
                                 <span class="account-name">Cash Reserves</span>
-                                <span class="account-value">$40,670</span>
+                                <span class="account-value" id="nwCash">$0</span>
                             </div>
                             <div class="account-item">
-                                <span class="account-name">Real Estate</span>
-                                <span class="account-value" id="netWorthRealEstate">$641,200</span>
+                                <span class="account-name">Real Estate Equity</span>
+                                <span class="account-value" id="nwRealEstate">$0</span>
+                            </div>
+                            <div class="account-item" style="font-size:0.75rem; color:var(--text-muted);">
+                                <span class="account-name">&nbsp;&nbsp;Home equity</span>
+                                <span class="account-value" id="nwHomeEquity">$0</span>
+                            </div>
+                            <div class="account-item" style="font-size:0.75rem; color:var(--text-muted);">
+                                <span class="account-name">&nbsp;&nbsp;Danebo equity</span>
+                                <span class="account-value" id="nwDaneboEquity">$0</span>
+                            </div>
+                            <div class="account-item" style="font-size:0.75rem; color:var(--text-muted);">
+                                <span class="account-name">&nbsp;&nbsp;Century equity</span>
+                                <span class="account-value" id="nwCenturyEquity">$0</span>
                             </div>
                             <div class="account-item">
-                                <span class="account-name">Vehicles</span>
-                                <span class="account-value">$37,995</span>
-                            </div>
-                            <div class="account-item" style="color:#f87171;">
-                                <span class="account-name">Total Liabilities</span>
-                                <span class="account-value" style="color:#f87171;">−$639,981</span>
+                                <span class="account-name">Vehicle Equity</span>
+                                <span class="account-value" id="nwVehicles">$0</span>
                             </div>
                             <div class="account-item" style="font-weight:600; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">
                                 <span class="account-name">Household Net Worth</span>
-                                <span class="account-value" style="color:#c084fc;" id="netWorthTotal">$1,185,868</span>
+                                <span class="account-value" style="color:#c084fc;" id="netWorthTotal">$0</span>
                             </div>
                         </div>
                         <div style="margin-top:8px; font-size:0.7rem; color:var(--text-muted);">
-                            Source: Net Worth Summary (Feb 2026)
+                            All values calculated from inputs above — change a number and this updates.
                         </div>
                     </div>
                 </div>
@@ -1730,6 +1738,26 @@
                 </div>
 
                 <div style="margin-bottom: 20px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">🧮 How Net Worth Is Calculated</h4>
+                    <p>The net worth number in the sidebar and header is computed from the same data that drives the rest of the dashboard. Nothing is hardcoded — every line comes from the property values, mortgage balances, and account totals entered above. Here's the exact formula:</p>
+                    <p style="margin: 8px 0; padding: 10px; background: var(--accent-light); border-radius: 8px; font-family: monospace; font-size: 0.8rem;">
+                        <strong>Real estate equity</strong><br>
+                        &nbsp;&nbsp;Home: market value &minus; mortgage balance<br>
+                        &nbsp;&nbsp;Danebo: market value &minus; mortgage balance<br>
+                        &nbsp;&nbsp;Century: market value &minus; mortgage balance<br>
+                        <br>
+                        + Retirement accounts (401K, 457b, PERS IAP)<br>
+                        + Brokerage investments (Schwab, ComputerShare, E*Trade)<br>
+                        + Cash reserves (checking, savings)<br>
+                        + Vehicle equity (value &minus; remaining loans)<br>
+                        <br>
+                        = <strong>Household Net Worth</strong>
+                    </p>
+                    <p style="margin: 8px 0;">This is a <strong>full household</strong> view — it includes 100% of every asset you and Mike own together. The sidebar breaks it down line by line so you can verify each piece against your statements. If any number looks off, check the property values and balances in the sections above — those are the inputs that drive this total.</p>
+                    <p style="margin: 8px 0;">Note: net worth is a <em>snapshot</em> — it reflects today's balances. The retirement projections (chart and table above) model how the portfolio grows and gets drawn down over time, but they don't project changes in property values or mortgage paydown into the future net worth display.</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
                     <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">⚙️ Key Assumptions You Can Adjust</h4>
                     <p>Every number in this dashboard can be tuned. The defaults are calibrated to your actual situation — professionally managed rentals in Eugene's strong market. The most impactful ones to review: portfolio growth rate (7% is a common long-term stock market average), inflation rate (3% is slightly above the Fed's 2% target), retirement ages (earlier = less pension, more portfolio years needed), and the rental assumptions. For rentals specifically: management fee (8%) is what you pay, vacancy (3%) reflects Eugene's low turnover, and maintenance (0.5%) is realistic for well-kept properties. Try setting management to 0% to see the self-managing upside, or bump vacancy to 8% to stress-test a rough year. Small changes in these rates compound significantly over 20-30 years.</p>
                 </div>
@@ -2376,10 +2404,26 @@
             document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff) + '/mo';
 
             // Dynamic net worth calculation
+            const daneboEquity = (baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance) * ownership;
+            const centuryEquity = (baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance) * ownership;
             const vehicleEquity = (baseData.vehicleLoans.tucson.value - baseData.vehicleLoans.tucson.loanBalance) +
                 (baseData.vehicleLoans.polestar.value - baseData.vehicleLoans.polestar.loanBalance);
+            const retirementAccounts = 316088 + 18000; // 401K/IRA + PERS IAP
+            const brokerageTotal = 91109 + 56031 + 1555; // Schwab + ComputerShare + ETrade
             const netWorth = totalEquity + baseData.currentPortfolio + baseData.cashReserves + vehicleEquity;
+
+            // Update header card
             document.getElementById('netWorthCard').textContent = formatCurrency(netWorth);
+
+            // Update sidebar breakdown — every line is computed, nothing stale
+            document.getElementById('nwRetirement').textContent = formatCurrency(retirementAccounts);
+            document.getElementById('nwBrokerage').textContent = formatCurrency(brokerageTotal);
+            document.getElementById('nwCash').textContent = formatCurrency(baseData.cashReserves);
+            document.getElementById('nwRealEstate').textContent = formatCurrency(totalEquity);
+            document.getElementById('nwHomeEquity').textContent = formatCurrency(homeEquity);
+            document.getElementById('nwDaneboEquity').textContent = formatCurrency(daneboEquity);
+            document.getElementById('nwCenturyEquity').textContent = formatCurrency(centuryEquity);
+            document.getElementById('nwVehicles').textContent = formatCurrency(vehicleEquity);
             document.getElementById('netWorthTotal').textContent = formatCurrency(netWorth);
         }
 
