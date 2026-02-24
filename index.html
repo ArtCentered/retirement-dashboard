@@ -730,8 +730,11 @@
         .year-step-display {
             font-size: 0.82rem;
             color: var(--text-secondary);
-            min-width: 200px;
+            width: 380px;
             text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
         .year-step-display strong {
             color: var(--accent);
@@ -907,7 +910,7 @@
             .phase-tab { padding: 5px 8px; font-size: 0.65rem; }
             .year-stepper { gap: 6px; }
             .year-step-btn { width: 34px; height: 34px; }
-            .year-step-display { font-size: 0.75rem; min-width: 160px; }
+            .year-step-display { font-size: 0.7rem; width: 250px; }
             .surplus-indicator { font-size: 0.75rem; padding: 6px 10px; }
 
             /* Collapsible sections */
