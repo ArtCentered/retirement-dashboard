@@ -1231,6 +1231,104 @@
             </div>
         </div>
 
+        <!-- SECTION: Tax History -->
+        <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
+            📊 Where you've been
+        </div>
+
+        <!-- Tax History Section -->
+        <div class="collapsible-section" id="section-tax-history">
+            <div class="collapsible-header" onclick="toggleSection('tax-history')">
+                <h3>📈 Tax History (2015-2025)</h3>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <!-- Summary Cards Row -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-label">Decade Income Growth</div>
+                        <div class="card-value green" id="decadeGrowth">+102.3%</div>
+                        <div class="card-sub">2015 to 2025</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label">Avg Effective Tax Rate</div>
+                        <div class="card-value blue" id="avgEffRate">9.33%</div>
+                        <div class="card-sub">2015-2025 average</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label">Total Taxes Paid (Federal)</div>
+                        <div class="card-value yellow" id="totalFedTax">$136,084</div>
+                        <div class="card-sub">11 years combined</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label">Total Taxes Paid (State)</div>
+                        <div class="card-value purple" id="totalStateTax">$94,667</div>
+                        <div class="card-sub">Oregon only</div>
+                    </div>
+                </div>
+
+                <!-- Income & Tax Chart -->
+                <div class="result-card" style="margin-bottom: 20px; margin-top: 20px;">
+                    <div class="result-title" style="color: #4ade80;">📊 Household AGI & Federal Tax Rate (2015-2025)</div>
+                    <div class="chart-container">
+                        <canvas id="taxHistoryChart"></canvas>
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px;">
+                        Left axis: Household AGI in dollars (blue bars). Right axis: Effective federal tax rate percentage (orange line).
+                        Income roughly doubled while tax rates remained stable, showing tax efficiency during growth years.
+                    </div>
+                </div>
+
+                <!-- Key Milestones Timeline -->
+                <div style="margin-top: 25px;">
+                    <div class="result-title" style="color: #fbbf24;">📅 Key Milestones</div>
+                    <div style="margin-top: 15px; padding: 15px 20px; background: var(--bg-tertiary); border-radius: 8px; border-left: 3px solid var(--accent);">
+                        <div style="display: grid; gap: 15px; font-size: 0.85rem;">
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2015</div>
+                                <div style="color: var(--text-secondary);">Filed separately — Travis at Sinclair TV, Mike at Walgreens/St. Charles</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2016</div>
+                                <div style="color: var(--text-secondary);">Mike sold Microsoft stock — $117K long-term capital gains</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2018</div>
+                                <div style="color: var(--text-secondary);">Last year filing separately</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2019</div>
+                                <div style="color: var(--text-secondary);">First joint filing — AGI $88K</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2020</div>
+                                <div style="color: var(--text-secondary);">First rental property income (Century Dr)</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2022</div>
+                                <div style="color: var(--text-secondary);">Added second rental (Danebo) + $7,500 EV credit + Travis moves to LRAPA</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2024</div>
+                                <div style="color: var(--text-secondary);">Household AGI crosses $180K</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-light);"></div>
+                            <div style="display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start;">
+                                <div style="font-weight: 700; color: var(--accent);">2025</div>
+                                <div style="color: var(--text-secondary);">Current year — AGI $185K, effective rate 12.6%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SECTION: What-If Controls -->
         <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
             🎛️ Adjust your plan
@@ -2004,6 +2102,11 @@
             if (chart) {
                 updateChartColors();
             }
+
+            // Update tax history chart colors if it exists
+            if (taxHistoryChartInstance) {
+                updateTaxHistoryChartColors();
+            }
         }
 
         // Load saved theme on page load
@@ -2139,6 +2242,168 @@
         };
 
         let chart = null;
+        let taxHistoryChartInstance = null;
+
+        // Tax History Data (2015-2025)
+        const taxHistoryData = {
+            years: [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+            householdAGI: [91672, 197731, 89552, 87888, 87985, 104656, 106590, 113162, 134820, 179631, 185392],
+            federalTax: [9535, 22719, 8008, 6808, 7157, 9070, 9349, 2983, 13828.0, 23293, 23334],
+            stateTax: [4013, 16216, 5394, 5263, 5485, 8814, 7115, 7552, 8914, 12761, 13140],
+            effectiveRate: [0.104, 0.1149, 0.0894, 0.0775, 0.0813, 0.0866, 0.0877, 0.0264, 0.1026, 0.1297, 0.1259],
+            w2Wages: [0,0,0,0,0,0,0,0,0,0,0],
+            rentalIncome: [0,0,0,0,0,0,0,0,0,0,0],
+            investmentIncome: [0,0,0,0,0,0,0,0,0,0,0],
+            otherIncome: [0,0,0,0,0,0,0,0,0,0,0]
+        };
+
+        // Initialize Tax History Chart
+        function initTaxHistoryChart() {
+            const canvas = document.getElementById('taxHistoryChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#a0aec0' : '#4a5568';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const barColor = isDark ? '#4facfe' : '#3182ce';
+            const lineColor = '#fb923c';
+
+            taxHistoryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: taxHistoryData.years.map(y => y.toString()),
+                    datasets: [
+                        {
+                            label: 'Household AGI',
+                            data: taxHistoryData.householdAGI,
+                            backgroundColor: barColor,
+                            borderColor: barColor,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: 'Effective Federal Tax Rate (%)',
+                            data: taxHistoryData.effectiveRate.map(r => r * 100),
+                            borderColor: lineColor,
+                            borderWidth: 3,
+                            type: 'line',
+                            fill: false,
+                            yAxisID: 'y1',
+                            pointRadius: 4,
+                            pointBackgroundColor: lineColor,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            tension: 0.3,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: textColor,
+                                font: { size: 11 },
+                                padding: 12
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: lineColor,
+                            borderWidth: 1,
+                            padding: 10,
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 11 },
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.yAxisID === 'y') {
+                                        return 'AGI: $' + formatCurrency(context.parsed.y).replace('$','').trim();
+                                    } else {
+                                        return 'Tax Rate: ' + context.parsed.y.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { size: 10 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Household AGI ($)',
+                                color: textColor,
+                                font: { size: 11, weight: 'bold' }
+                            },
+                            grid: { color: gridColor },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Effective Tax Rate (%)',
+                                color: textColor,
+                                font: { size: 11, weight: 'bold' }
+                            },
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return value.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Tax History Chart for Theme
+        function updateTaxHistoryChartColors() {
+            if (!taxHistoryChartInstance) return;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#a0aec0' : '#4a5568';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+            taxHistoryChartInstance.options.scales.x.grid.color = gridColor;
+            taxHistoryChartInstance.options.scales.y.grid.color = gridColor;
+            taxHistoryChartInstance.options.scales.x.ticks.color = textColor;
+            taxHistoryChartInstance.options.scales.y.ticks.color = textColor;
+            taxHistoryChartInstance.options.scales.y1.ticks.color = textColor;
+            taxHistoryChartInstance.options.plugins.legend.labels.color = textColor;
+
+            taxHistoryChartInstance.update('none');
+        }
 
         // Contribution changes array (max 5)
         const MAX_CHANGES = 5;
@@ -3610,6 +3875,7 @@
         renderChangesTable();
         update();
         initYearStepper();
+        initTaxHistoryChart();
     </script>
 </body>
 </html>
