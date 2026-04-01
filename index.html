@@ -115,8 +115,7 @@
             display: none;
             position: absolute;
             top: calc(100% + 8px);
-            left: auto;
-            right: 0;
+            left: -6px;
             width: 280px;
             max-width: 90vw;
             padding: 14px;
@@ -132,12 +131,7 @@
             word-wrap: break-word;
         }
         .tooltip::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            right: 12px;
-            border: 8px solid transparent;
-            border-bottom-color: #1e293b;
+            display: none;
         }
 
         /* Collapsible sections */
@@ -273,13 +267,11 @@
         .control-group { }
         .control-label {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
             font-size: 0.8rem;
         }
         .control-label span:first-child { color: var(--text-secondary); }
-        .control-label span:last-child { font-weight: 600; }
         .control-label .mike-color { color: #60a5fa; }
         .control-label .travis-color { color: #4ade80; }
         .control-label .default-color { color: var(--accent); }
@@ -698,94 +690,59 @@
         .note-box.info { background: var(--accent-light); }
         .note-box.warning { background: rgba(251, 191, 36, 0.1); }
         .note-box.danger { background: rgba(248, 113, 113, 0.1); }
-
-        /* Card layout classes */
-        .cards-primary { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-        .cards-secondary { margin-top: -10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-        .card-compact { padding: 12px 15px; }
-
-        /* ========== MOBILE RESPONSIVE ========== */
-        @media (max-width: 600px) {
-            .container { padding: 10px; }
-            h1 { font-size: 1.2rem !important; }
-            h3 { font-size: 0.9rem; }
-
-            /* Summary cards: 2 columns on phone */
-            .cards-primary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .cards-secondary { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: -5px; }
-            .card { padding: 12px; }
-            .card-value { font-size: 1.15rem; }
-            .card-compact .card-value { font-size: 1rem !important; }
-            .card-label { font-size: 0.6rem; }
-            .card-sub { font-size: 0.6rem; }
-
-            /* Status banner */
-            .status-banner { padding: 12px 15px; }
-            .status-title { font-size: 0.9rem; }
-            .status-detail { font-size: 0.7rem; }
-            .status-icon { font-size: 1.2rem; width: 35px; height: 35px; }
-
-            /* Chart taller on mobile for readability */
-            .chart-container { height: 250px; }
-
-            /* Controls: stack inputs vertically */
-            .controls-grid { grid-template-columns: 1fr !important; gap: 12px; }
-
-            /* Bigger touch targets for inputs */
-            input[type="number"], select {
-                font-size: 16px !important; /* Prevents iOS zoom on focus */
-                min-height: 40px;
-                padding: 8px 10px;
-            }
-            input[type="checkbox"] {
-                width: 20px;
-                height: 20px;
-            }
-            .input-group { gap: 6px; }
-
-            /* Person cards: single column */
-            .person-section { grid-template-columns: 1fr; gap: 12px; }
-            .person-card { padding: 15px; }
-            .person-name { font-size: 0.95rem; }
-            .account-list { font-size: 0.8rem; }
-            .account-item { padding: 6px 0; }
-
-            /* Scenario table: horizontal scroll */
-            .results-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .scenarios-table { font-size: 0.65rem; min-width: 500px; }
-            .scenarios-table th, .scenarios-table td { padding: 6px 4px; }
-
-            /* Rental cards: single column */
-            .rental-cards { grid-template-columns: 1fr !important; }
-            .rental-card { padding: 15px; }
-
-            /* Income breakdown: smaller text */
-            .income-legend { font-size: 0.7rem; }
-
-            /* Collapsible sections */
-            .collapsible-header { padding: 12px 15px; }
-            .collapsible-content { padding: 12px; }
-
-            /* Section labels */
-            div[style*="letter-spacing: 2px"] { font-size: 0.7rem !important; margin: 18px 0 8px 0 !important; }
-
-            /* Result card */
-            .result-card { padding: 15px; }
-            .result-title { font-size: 0.85rem; }
-
-            /* Footer */
-            .footer { font-size: 0.55rem; padding: 15px; }
-        }
-
-        /* Tablet tweaks */
-        @media (max-width: 900px) and (min-width: 601px) {
-            .cards-primary { grid-template-columns: repeat(2, 1fr); }
-            .cards-secondary { grid-template-columns: repeat(4, 1fr); }
-            .controls-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
     </style>
 </head>
 <body>
+    <!-- Password Gate -->
+    <div id="password-gate" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--bg-primary); z-index: 10000;
+        display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 20px;
+    ">
+        <div style="
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: var(--shadow); max-width: 400px; width: 90%;
+        ">
+            <h2 style="color: var(--accent); margin-bottom: 8px;">Retirement Dashboard</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Enter the password to continue</p>
+            <input id="password-input" type="password" placeholder="Password" style="
+                width: 100%; padding: 12px 16px; border: 1px solid var(--input-border);
+                border-radius: 8px; background: var(--input-bg); color: var(--text-primary);
+                font-size: 1rem; outline: none; margin-bottom: 16px;
+            " onkeydown="if(event.key==='Enter') checkPassword()">
+            <button onclick="checkPassword()" style="
+                width: 100%; padding: 12px; background: var(--accent); color: white;
+                border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;
+            ">Unlock</button>
+            <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 12px; display: none;">Incorrect password</p>
+        </div>
+    </div>
+    <script>
+        const DASHBOARD_PASSWORD = 'Neptunethecutecat2026';
+        function checkPassword() {
+            const input = document.getElementById('password-input');
+            if (input.value === DASHBOARD_PASSWORD) {
+                document.getElementById('password-gate').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                sessionStorage.setItem('dashboard_unlocked', 'true');
+            } else {
+                document.getElementById('password-error').style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+        // Auto-unlock if already authenticated this session
+        if (sessionStorage.getItem('dashboard_unlocked') === 'true') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('password-gate').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            });
+        }
+    </script>
+
+    <div id="main-content" style="display: none;">
     <div class="container">
         <div class="header">
             <div style="width: 100px;"></div>
@@ -808,289 +765,62 @@
             </div>
         </div>
 
-        <!-- Key Numbers: The 4 things that matter most -->
-        <div class="cards-grid cards-primary">
+        <!-- Earliest Shared Retirement Age -->
+        <div id="sharedRetireCard" style="
+            margin-bottom: 20px; padding: 16px 20px;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; box-shadow: var(--shadow);
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+        ">
+            <div style="font-size: 1.3rem;">🎯</div>
+            <div style="flex: 1; min-width: 200px;">
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--accent);">Earliest Shared Retirement Age</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                    Both retire at the same age (Mike b.1981, Travis b.1989) with income ≥ expenses
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div id="sharedRetireAge" style="font-size: 1.8rem; font-weight: 700; color: #4ade80;">--</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">years old</div>
+            </div>
+            <div id="sharedRetireDetail" style="font-size: 0.75rem; color: var(--text-secondary); min-width: 200px;">
+                Calculating...
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="cards-grid">
             <div class="card">
-                <div class="card-label">Household Net Worth</div>
-                <div class="card-value" style="color:#c084fc;" id="netWorthCard">$1,185,868</div>
-                <div class="card-sub">Everything you own minus owe</div>
+                <div class="card-label">Current Portfolio</div>
+                <div class="card-value blue">$339,572</div>
+                <div class="card-sub">All accounts + PERS IAP</div>
             </div>
             <div class="card">
-                <div class="card-label">Invested for Growth</div>
-                <div class="card-value blue" id="totalInvestableCard">$482,783</div>
-                <div class="card-sub">Retirement + brokerage accounts</div>
+                <div class="card-label">Annual Expenses</div>
+                <div class="card-value yellow">$113,598</div>
+                <div class="card-sub">2025 spending baseline</div>
             </div>
             <div class="card">
-                <div class="card-label">Projected Retirement Income</div>
+                <div class="card-label">PERS Pension</div>
+                <div class="card-value green" id="pensionPreview">$74,170/yr</div>
+                <div class="card-sub" id="pensionSubtext">At Travis's retirement</div>
+                <div class="card-sub" id="pensionReduction" style="color: #f87171;"></div>
+            </div>
+            <div class="card">
+                <div class="card-label">Total Retirement Income</div>
                 <div class="card-value purple" id="totalIncomePreview">$181,756/yr</div>
                 <div class="card-sub">Pension + Portfolio + SS + Rental</div>
             </div>
             <div class="card">
-                <div class="card-label">vs Annual Expenses</div>
+                <div class="card-label">vs Expenses</div>
                 <div class="card-value green" id="gapValue">+$12,440</div>
                 <div class="card-sub" id="gapSubtext">Surplus at retirement</div>
             </div>
-        </div>
-
-        <!-- Secondary metrics row -->
-        <div class="cards-grid cards-secondary">
-            <div class="card card-compact">
-                <div class="card-label">Cash Reserves</div>
-                <div class="card-value" style="color:#4ade80; font-size:1.2rem;">$40,670</div>
-                <div class="card-sub">Emergency fund</div>
-            </div>
-            <div class="card card-compact">
-                <div class="card-label">Annual Expenses</div>
-                <div class="card-value yellow" style="font-size:1.2rem;">$113,598</div>
-                <div class="card-sub">2025 baseline</div>
-            </div>
-            <div class="card card-compact">
-                <div class="card-label">PERS Pension</div>
-                <div class="card-value green" style="font-size:1.2rem;" id="pensionPreview">$74,170/yr</div>
-                <div class="card-sub" id="pensionSubtext">At Travis's retirement</div>
-                <div class="card-sub" id="pensionReduction" style="color: #f87171;"></div>
-            </div>
-            <div class="card card-compact">
-                <div class="card-label">Rental Income (50%)</div>
-                <div class="card-value orange" style="font-size:1.2rem;" id="rentalIncomePreview">$0/yr</div>
+            <div class="card">
+                <div class="card-label">Rental Income</div>
+                <div class="card-value orange" id="rentalIncomePreview">$0/yr</div>
                 <div class="card-sub" id="rentalIncomeSubtext">Current net (2 properties)</div>
             </div>
-        </div>
-
-        <!-- SECTION: What We Have -->
-        <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
-            📋 What the household has today
-        </div>
-
-        <!-- Person Breakdown (Mike & Travis accounts) + Household Assets -->
-        <div class="collapsible-section" id="section-household-assets">
-            <div class="collapsible-header" onclick="toggleSection('household-assets')">
-                <h3>💰 Accounts & Assets Overview</h3>
-                <span class="toggle-icon" id="toggle-household-assets">▼</span>
-            </div>
-            <div class="collapsible-content" id="content-household-assets">
-                <!-- Mike & Travis Retirement Accounts -->
-                <div class="person-section">
-                    <div class="person-card">
-                        <div class="person-name mike">👤 Mike (Age 44)</div>
-                        <div class="account-list">
-                            <div class="account-item" style="font-size:0.75rem;color:var(--text-muted);padding-bottom:2px;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <span>RETIREMENT ACCOUNTS</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">403B/401A (Peacehealth)</span>
-                                <span class="account-value">$216,204</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">401K (Current)</span>
-                                <span class="account-value">$25,408</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Roth IRA</span>
-                                <span class="account-value">$2,612</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Annual Contributions</span>
-                                <span class="account-value green" id="mikeContribDisplay">$19,560</span>
-                            </div>
-                            <div class="account-item" style="font-weight: 600;">
-                                <span class="account-name">Retirement Total</span>
-                                <span class="account-value blue">$244,224</span>
-                            </div>
-                        </div>
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                            <div style="font-size: 0.8rem; color: #a78bfa; font-weight: 600;">📋 No Pension</div>
-                            <div style="font-size: 0.7rem; color: #888; margin-top: 4px;">
-                                Relies on 401k/403b + Social Security at 67
-                            </div>
-                        </div>
-                    </div>
-                    <div class="person-card">
-                        <div class="person-name travis">👤 Travis (Age 36)</div>
-                        <div class="account-list">
-                            <div class="account-item" style="font-size:0.75rem;color:var(--text-muted);padding-bottom:2px;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <span>RETIREMENT ACCOUNTS</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">457B (LRAPA)</span>
-                                <span class="account-value">$29,618</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Voya Pension (401k)</span>
-                                <span class="account-value">$23,308</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Sinclair</span>
-                                <span class="account-value">$17,938</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Roth IRA</span>
-                                <span class="account-value">$1,000</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">PERS IAP</span>
-                                <span class="account-value">$18,000</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Annual Contributions</span>
-                                <span class="account-value green" id="travisContribDisplay">$31,100</span>
-                            </div>
-                            <div class="account-item" style="font-weight: 600;">
-                                <span class="account-name">Retirement Total</span>
-                                <span class="account-value green">$89,864</span>
-                            </div>
-                        </div>
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                            <div style="font-size: 0.8rem; color: #fbbf24; font-weight: 600;">🏛️ Oregon PERS Pension (OPSRP)</div>
-                            <div style="font-size: 0.7rem; color: #888; margin-top: 4px;">
-                                1.5% × years × final avg salary<br>
-                                Started: Oct 2022 | Vesting: Oct 2027 | Salary: $152K
-                            </div>
-                            <div style="font-size: 0.65rem; color: #f87171; margin-top: 6px; padding: 6px; background: rgba(248,113,113,0.1); border-radius: 4px;">
-                                <strong>Early Penalty:</strong> Normal age 65 (or 58 w/30 yrs) | Age 60: ~40% reduction | Age 55: ~61% reduction
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Brokerage, Cash, Vehicles -->
-                <div class="person-section" style="margin-top:15px;">
-                    <div class="person-card">
-                        <div class="person-name" style="color:#4facfe;">📈 Brokerage Investments</div>
-                        <div class="account-list">
-                            <div class="account-item">
-                                <span class="account-name">Schwab (stocks)</span>
-                                <span class="account-value" style="color:#4facfe;">$91,109</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">ComputerShare (NKE)</span>
-                                <span class="account-value" style="color:#4facfe;">$56,031</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">E*Trade</span>
-                                <span class="account-value" style="color:#4facfe;">$1,555</span>
-                            </div>
-                            <div class="account-item" style="font-weight:600;">
-                                <span class="account-name">Total Brokerage</span>
-                                <span class="account-value" style="color:#4facfe;">$148,695</span>
-                            </div>
-                        </div>
-                        <div style="margin-top:8px; font-size:0.7rem; color:var(--text-muted);">
-                            Included in portfolio growth projection
-                        </div>
-                    </div>
-                    <div class="person-card">
-                        <div class="person-name" style="color:#4ade80;">🏦 Cash & Savings</div>
-                        <div class="account-list">
-                            <div class="account-item">
-                                <span class="account-name">Cap One Checking</span>
-                                <span class="account-value" style="color:#4ade80;">$2,900</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Cap One Savings</span>
-                                <span class="account-value" style="color:#4ade80;">$36,000</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Peak / Selco / Cash</span>
-                                <span class="account-value" style="color:#4ade80;">$1,770</span>
-                            </div>
-                            <div class="account-item" style="font-weight:600;">
-                                <span class="account-name">Total Cash</span>
-                                <span class="account-value" style="color:#4ade80;">$40,670</span>
-                            </div>
-                        </div>
-                        <div style="margin-top:8px; font-size:0.7rem; color:var(--text-muted);">
-                            Emergency fund — not in portfolio projection
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicles & Net Worth -->
-                <div class="person-section" style="margin-top:15px;">
-                    <div class="person-card">
-                        <div class="person-name" style="color:#fb923c;">🚗 Vehicles</div>
-                        <div class="account-list">
-                            <div class="account-item">
-                                <span class="account-name">Tucson</span>
-                                <span class="account-value" style="color:#fb923c;">$20,825</span>
-                            </div>
-                            <div class="account-item" style="font-size:0.8rem;">
-                                <span class="account-name" style="color:var(--text-muted);">└ Loan remaining</span>
-                                <span class="account-value" style="color:#f87171;">−$2,180</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Polestar</span>
-                                <span class="account-value" style="color:#fb923c;">$17,170</span>
-                            </div>
-                            <div class="account-item" style="font-size:0.8rem;">
-                                <span class="account-name" style="color:var(--text-muted);">└ Loan remaining</span>
-                                <span class="account-value" style="color:#f87171;">−$10,527</span>
-                            </div>
-                            <div class="account-item" style="font-weight:600;">
-                                <span class="account-name">Net Vehicle Equity</span>
-                                <span class="account-value" style="color:#fb923c;">$25,288</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="person-card">
-                        <div class="person-name" style="color:#c084fc;">📊 Net Worth Summary</div>
-                        <div class="account-list">
-                            <div class="account-item">
-                                <span class="account-name">Retirement Accounts</span>
-                                <span class="account-value">$334,088</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Brokerage Investments</span>
-                                <span class="account-value">$148,695</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Cash Reserves</span>
-                                <span class="account-value">$40,670</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Real Estate (50% share)</span>
-                                <span class="account-value" id="netWorthRealEstate">$641,200</span>
-                            </div>
-                            <div class="account-item">
-                                <span class="account-name">Vehicles</span>
-                                <span class="account-value">$37,995</span>
-                            </div>
-                            <div class="account-item" style="color:#f87171;">
-                                <span class="account-name">Total Liabilities</span>
-                                <span class="account-value" style="color:#f87171;">−$639,981</span>
-                            </div>
-                            <div class="account-item" style="font-weight:600; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">
-                                <span class="account-name">Household Net Worth</span>
-                                <span class="account-value" style="color:#c084fc;" id="netWorthTotal">$1,185,868</span>
-                            </div>
-                        </div>
-                        <div style="margin-top:8px; font-size:0.7rem; color:var(--text-muted);">
-                            Source: Net Worth Summary (Feb 2026)
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION: The Big Picture -->
-        <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
-            📈 The big picture
-        </div>
-
-        <!-- Chart (prominent, above controls) -->
-        <div class="result-card" style="margin-bottom: 20px;">
-            <div class="result-title" style="color: #4ade80;">📈 Portfolio Growth Over Time</div>
-            <div class="chart-container">
-                <canvas id="projectionChart"></canvas>
-            </div>
-            <div style="font-size: 0.7rem; color: #666; margin-top: 10px;">
-                Hover/tap points to see both ages. Vertical lines show retirement dates. Adjust settings below to see how changes affect the projection.
-            </div>
-        </div>
-
-        <!-- SECTION: What-If Controls -->
-        <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
-            🎛️ Adjust your plan
         </div>
 
         <!-- Retirement Age Controls -->
@@ -1107,24 +837,24 @@
                         <span class="info-tip">?<span class="tooltip">When Mike stops working. Earlier retirement means more years in retirement but less time to save. Mike doesn't have a pension, so portfolio income is key.</span></span>
                     </div>
                     <div class="input-group">
-                        <input type="number" id="mikeRetireAge" min="50" max="67" step="1" value="62">
+                        <input type="number" id="mikeRetireAge" min="50" max="67" step="1" value="55">
                         <span class="unit">years old</span>
                     </div>
                     <div class="helper-text">
-                        Currently 44 → retires in <span id="mikeYearsToRetire">16</span> years (year <span id="mikeRetireYear">2042</span>)
+                        Currently 44 → retires in <span id="mikeYearsToRetire">11</span> years (year <span id="mikeRetireYear">2037</span>)
                     </div>
                 </div>
                 <div class="control-group">
                     <div class="control-label">
                         <span>Travis's Retirement Age</span>
-                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service. Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
+                        <span class="info-tip">?<span class="tooltip">When Travis stops working. Earlier retirement reduces PERS years of service (unless limited with the Limit PERS Years toggle). Retiring before 55 defers pension collection. Age 55 = 61% of full benefit; Age 60 = 60%; Age 65 = 100%.</span></span>
                     </div>
                     <div class="input-group">
-                        <input type="number" id="travisRetireAge" min="50" max="67" step="1" value="62">
+                        <input type="number" id="travisRetireAge" min="50" max="67" step="1" value="55">
                         <span class="unit">years old</span>
                     </div>
                     <div class="helper-text">
-                        Currently 36 → retires in <span id="travisYearsToRetire">24</span> years (year <span id="travisRetireYear">2050</span>)
+                        Currently 36 → retires in <span id="travisYearsToRetire">19</span> years (year <span id="travisRetireYear">2045</span>)
                     </div>
                 </div>
             </div>
@@ -1137,7 +867,7 @@
                     </div>
                     <div class="number-input-group">
                         <span class="currency-prefix">$</span>
-                        <input type="number" id="mikeContrib" class="contrib-input mike-border" min="0" max="100000" step="500" value="19560">
+                        <input type="number" id="mikeContrib" class="contrib-input mike-border" min="0" max="100000" step="500" value="23300">
                         <span class="input-suffix">/year</span>
                     </div>
                     <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px;">
@@ -1150,7 +880,7 @@
                     </div>
                     <div class="number-input-group">
                         <span class="currency-prefix">$</span>
-                        <input type="number" id="travisContrib" class="contrib-input travis-border" min="0" max="100000" step="500" value="31100">
+                        <input type="number" id="travisContrib" class="contrib-input travis-border" min="0" max="100000" step="500" value="36600">
                         <span class="input-suffix">/year</span>
                     </div>
                     <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px;">
@@ -1165,8 +895,8 @@
                 The change is added to their current contribution at that time, and then continues
                 growing by the "Annual Contribution Growth %" rate each year after.
                 <br><br>
-                <strong>Example:</strong> Mike contributes $19,560/yr now. In 2030, he pays off his car and can add $500/mo more.
-                Enter: Mike, 2030, +$6,000. From 2030 onward, his contributions become ~$25,560 and grow by 2%/yr.
+                <strong>Example:</strong> Mike contributes $23,300/yr now. In 2030, he pays off his car and can add $500/mo more.
+                Enter: Mike, 2030, +$6,000. From 2030 onward, his contributions become ~$29,300 and grow by 2%/yr.
             </div>
             <div class="changes-table-container">
                 <div id="changesTableContainer">
@@ -1227,26 +957,6 @@
                 </div>
                 <div class="control-group">
                     <div class="control-label">
-                        <span>Federal Tax Rate</span>
-                        <span class="info-tip">?<span class="tooltip">Federal income tax on pension and 401k/403b withdrawals. At ~$150-200K household retirement income, the effective rate is ~18-22% after the standard deduction ($30,000 for married filing jointly). This also applies to ~85% of Social Security benefits above $44K combined income.</span></span>
-                    </div>
-                    <div class="input-group">
-                        <input type="number" id="federalTaxRate" min="0" max="30" step="0.5" value="18">
-                        <span class="unit">%</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Oregon State Tax Rate</span>
-                        <span class="info-tip">?<span class="tooltip">Oregon taxes pension and 401k/403b withdrawals as regular income (~8% effective). Oregon does NOT tax Social Security benefits.</span></span>
-                    </div>
-                    <div class="input-group">
-                        <input type="number" id="oregonTaxRate" min="0" max="12" step="0.5" value="8">
-                        <span class="unit">%</span>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label">
                         <span>Annual Contribution Growth</span>
                         <span class="info-tip">?<span class="tooltip">Each year, contributions increase by this %. This models raises or automatic increases. If you add a "Planned Change" above, that new amount becomes the base, and this growth rate then applies to it going forward.</span></span>
                     </div>
@@ -1277,6 +987,19 @@
                     <div class="input-group">
                         <input type="number" id="salaryGrowth" min="0" max="5" step="0.5" value="2">
                         <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Limit PERS Years</span>
+                        <span class="info-tip">?<span class="tooltip">Toggle on if Travis might leave PERS employment before retirement. When enabled, set the total years in PERS (started Oct 2022). The pension freezes at the years accrued. Formula: 1.5% × total years × final avg salary.</span></span>
+                    </div>
+                    <div class="input-group" style="gap: 6px;">
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:var(--text-secondary);">
+                            <input type="checkbox" id="persYearsToggle" onchange="togglePersYears()" style="width:16px;height:16px;accent-color:#fbbf24;">
+                        </label>
+                        <input type="number" id="persYears" min="4" max="45" step="1" value="10" disabled style="opacity:0.4;">
+                        <span class="unit">yrs</span>
                     </div>
                 </div>
                 <div class="control-group">
@@ -1333,7 +1056,7 @@
         <!-- Rental Properties Section -->
         <div class="collapsible-section" id="section-rentals">
             <div class="collapsible-header" onclick="toggleSection('rentals')">
-                <h3>🏠 Rental Properties <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <h3>🏠 Rental Properties</h3>
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
@@ -1412,19 +1135,31 @@
                             <span class="rental-stat-value" id="daneboValue">$409,900</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Mortgage</span>
-                            <span class="rental-stat-value">$739/mo</span>
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="daneboEquity">$205,158</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,479/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
                             <span class="rental-stat-value" id="daneboPayoff">2050</span>
                         </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Interest Rate</span>
+                            <span class="rental-stat-value">3.75%</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">After Payoff</span>
+                            <span class="rental-stat-value" id="daneboPostPayoff">$402/mo</span>
+                        </div>
                     </div>
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="daneboExtraPrincipal" min="0" max="2000" step="50" value="0">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="daneboExtraPrincipal" min="0" max="4000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1473,19 +1208,31 @@
                             <span class="rental-stat-value" id="centuryValue">$387,300</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Mortgage</span>
-                            <span class="rental-stat-value">$720/mo</span>
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="centuryEquity">$213,728</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,314/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
                             <span class="rental-stat-value" id="centuryPayoff">~2044</span>
                         </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">Interest Rate</span>
+                            <span class="rental-stat-value">3.75%</span>
+                        </div>
+                        <div class="rental-stat">
+                            <span class="rental-stat-label">After Payoff</span>
+                            <span class="rental-stat-value" id="centuryPostPayoff">$377/mo</span>
+                        </div>
                     </div>
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="centuryExtraPrincipal" min="0" max="2000" step="50" value="62">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="centuryExtraPrincipal" min="0" max="4000" step="50" value="125">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1520,13 +1267,20 @@
                 <strong>💡 Note:</strong> Danebo has $228/mo furnace loan (ends 2029). Net income calculations include mortgage P+I+escrow, management fees, vacancy, and maintenance.
                 After mortgage payoff, net income jumps significantly.
             </div>
+            <div class="note-box info" style="margin-top:10px;">
+                <strong>🏠 Property History:</strong><br>
+                <strong>2015:</strong> Purchased Danebo (lived in as primary residence)<br>
+                <strong>2016:</strong> Began receiving rental income from Century<br>
+                <strong>2017:</strong> Purchased Century<br>
+                <strong>2020:</strong> Moved to Timberline; began renting out Danebo
+            </div>
             </div>
         </div>
 
         <!-- Primary Residence Section -->
         <div class="collapsible-section" id="section-home">
             <div class="collapsible-header" onclick="toggleSection('home')">
-                <h3>🏡 Primary Residence <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(Household 50% share)</span></h3>
+                <h3>🏡 Primary Residence</h3>
                 <span class="collapse-icon">▼</span>
             </div>
             <div class="collapsible-content">
@@ -1546,12 +1300,12 @@
                             <span class="rental-stat-value" id="homeValue">$481,000</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Equity</span>
-                            <span class="rental-stat-value green" id="homeEquity">$119,828</span>
+                            <span class="rental-stat-label">Equity</span>
+                            <span class="rental-stat-value green" id="homeEquity">$239,655</span>
                         </div>
                         <div class="rental-stat">
-                            <span class="rental-stat-label">Household 50% Payment</span>
-                            <span class="rental-stat-value">$864/mo</span>
+                            <span class="rental-stat-label">Mortgage Payment</span>
+                            <span class="rental-stat-value">$1,729/mo</span>
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">Payoff Year</span>
@@ -1563,14 +1317,14 @@
                         </div>
                         <div class="rental-stat">
                             <span class="rental-stat-label">After Payoff</span>
-                            <span class="rental-stat-value" id="homePostPayoff">$286/mo</span>
+                            <span class="rental-stat-value" id="homePostPayoff">$572/mo</span>
                         </div>
                     </div>
                     <div class="rental-input-row">
                         <label>Extra Principal:</label>
                         <span style="color:var(--text-secondary);">$</span>
-                        <input type="number" id="homeExtraPrincipal" min="0" max="2000" step="50" value="0">
-                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo (household 50%)</span>
+                        <input type="number" id="homeExtraPrincipal" min="0" max="4000" step="50" value="0">
+                        <span style="font-size:0.7rem;color:var(--text-muted);">/mo</span>
                     </div>
                     <div class="rental-input-row">
                         <label>
@@ -1611,11 +1365,11 @@
                             <span class="rental-stat-value" id="totalRealEstateValue">$1,278,200</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <span class="rental-stat-label" style="font-size:0.8rem;">Household 50% Equity</span>
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Total Equity</span>
                             <span class="rental-stat-value green" id="totalEquity">$329,271</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <span class="rental-stat-label" style="font-size:0.8rem;">Household Monthly Mortgage Payments</span>
+                            <span class="rental-stat-label" style="font-size:0.8rem;">Monthly Mortgage Payments</span>
                             <span class="rental-stat-value yellow" id="totalMortgages">$2,323/mo</span>
                         </div>
                         <div class="rental-stat" style="flex-direction:row;justify-content:space-between;padding:8px 0;">
@@ -1631,24 +1385,10 @@
             </div>
         </div>
 
-        <!-- SECTION: Detailed Analysis -->
-        <div style="margin: 25px 0 10px 0; padding-left: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
-            📋 Detailed analysis
-        </div>
-
-        <!-- Income Breakdown Bar -->
-        <div class="income-breakdown">
-            <div class="result-title" style="color: #fbbf24;">💵 Income vs. Expenses at Retirement <span id="incomeBreakdownSubtitle" style="font-size:0.8rem;color:var(--text-secondary);">(when both retired)</span></div>
-            <div id="incomeBarContainer">
-                <div class="income-bar" id="incomeBar"></div>
-            </div>
-            <div class="income-legend" id="incomeLegend"></div>
-        </div>
-
-        <!-- Scenario Detail Table -->
-        <div class="results-section" style="grid-template-columns: 1fr;">
+        <!-- Results Grid -->
+        <div class="results-section">
             <div class="result-card">
-                <div class="result-title" style="color: #4facfe;">📊 Retirement Phase Breakdown</div>
+                <div class="result-title" style="color: #4facfe;">📊 Household Retirement Scenario</div>
                 <table class="scenarios-table">
                     <thead>
                         <tr>
@@ -1656,7 +1396,7 @@
                             <th>Years</th>
                             <th>Portfolio</th>
                             <th>Income Sources</th>
-                            <th>vs Expenses</th>
+                            <th>Surplus / Gap</th>
                         </tr>
                     </thead>
                     <tbody id="scenariosBody">
@@ -1667,14 +1407,154 @@
                     Contributions stop when each person retires. Social Security kicks in at 67.
                 </div>
             </div>
+            <div class="result-card">
+                <div class="result-title" style="color: #4ade80;">📈 Portfolio Growth Over Time</div>
+                <div class="chart-container">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 10px;">
+                    Hover/tap points to see both ages. Vertical lines show retirement dates.
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Breakdown -->
+        <div class="income-breakdown">
+            <div class="result-title" style="color: #fbbf24;">💵 Income Breakdown <span id="incomeBreakdownSubtitle" style="font-size:0.8rem;color:var(--text-secondary);">(when both retired)</span></div>
+            <div id="incomeBarContainer">
+                <div class="income-bar" id="incomeBar"></div>
+            </div>
+            <div class="income-legend" id="incomeLegend"></div>
+        </div>
+
+        <!-- Person Breakdown -->
+        <div class="person-section">
+            <div class="person-card">
+                <div class="person-name mike">👤 Mike (Age 44)</div>
+                <div class="account-list">
+                    <div class="account-item">
+                        <span class="account-name">Peacehealth 403B</span>
+                        <span class="account-value">$211,300</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Roth IRA</span>
+                        <span class="account-value">$7,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">401K (Current)</span>
+                        <span class="account-value">$25,408</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Annual Contributions</span>
+                        <span class="account-value green" id="mikeContribDisplay">$23,300</span>
+                    </div>
+                    <div class="account-item" style="font-weight: 600;">
+                        <span class="account-name">Total</span>
+                        <span class="account-value blue">$243,708</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.85rem; color: #a78bfa; font-weight: 600;">📋 No Pension</div>
+                    <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">
+                        Base salary: $70,000 | Relies on 401k/403b + Social Security at 67
+                    </div>
+                </div>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="font-size: 0.7rem; color: #a0aec0; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 4px;">
+                        <strong>Career:</strong> CPhT | B.S. Sports &amp; Exercise Science (UNC, Summa Cum Laude)<br>
+                        Walgreens (2009–2012) → St. Charles Medical Center, Bend (2012–2015)<br>
+                        → PeaceHealth Sacred Heart (2015–2021) → PeaceHealth Home Infusion (2021–2023)<br>
+                        → Emerging Health, Home Infusion (2023–present)
+                    </div>
+                </div>
+            </div>
+            <div class="person-card">
+                <div class="person-name travis">👤 Travis (Age 36)</div>
+                <div class="account-list">
+                    <div class="account-item">
+                        <span class="account-name">457B (LRAPA)</span>
+                        <span class="account-value">$29,618</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Voya Pension</span>
+                        <span class="account-value">$23,308</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Sinclair</span>
+                        <span class="account-value">$17,938</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Roth IRA</span>
+                        <span class="account-value">$7,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">PERS IAP</span>
+                        <span class="account-value">$18,000</span>
+                    </div>
+                    <div class="account-item">
+                        <span class="account-name">Annual Contributions</span>
+                        <span class="account-value green" id="travisContribDisplay">$36,600</span>
+                    </div>
+                    <div class="account-item" style="font-weight: 600;">
+                        <span class="account-name">Total Accounts</span>
+                        <span class="account-value green">$95,864</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.85rem; color: #fbbf24; font-weight: 600;">🏛️ Oregon PERS Pension (OPSRP)</div>
+                    <div style="font-size: 0.7rem; color: #a0aec0; margin-top: 5px; margin-bottom: 5px; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 4px;">
+                        <strong>Career:</strong> B.S. Meteorology (UNC)<br>
+                        KMGH Denver Intern (2009–2011) → Gray TV, Cheyenne (2011–2012)<br>
+                        → NPG, Bend (2012–2015) → Sinclair, Chief Meteorologist (2015–2020)<br>
+                        → LRAPA Public Affairs Manager (2020–2024) → Executive Director (2024–present)<br>
+                        PERS employer Oct 2022 | Vested: Oct 2027
+                    </div>
+                    <div style="font-size: 0.75rem; color: #888; margin-top: 5px;" id="persInfoCard">
+                        Formula: 1.5% × years × final avg salary<br>
+                        Started: Oct 2022 | Vesting: Oct 2027<br>
+                        Current salary: $152,000
+                    </div>
+                    <div style="font-size: 0.7rem; color: #f87171; margin-top: 8px; padding: 8px; background: rgba(248,113,113,0.1); border-radius: 6px;">
+                        <strong>Early Retirement Penalty:</strong><br>
+                        Normal age: 65 (or 58 w/ 30 yrs)<br>
+                        Earliest: 55 (~61% reduction)<br>
+                        Age 60: ~40% reduction
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer">
-            Data sourced from Retirement Calc.xlsx, Net Worth Summary.xlsx, and Combined_Credit_Cards_2025_All.xlsx | Dashboard updated February 2026
+            Data sourced from Retirement Calc.xlsx and Combined_Credit_Cards_2025_All.xlsx | Dashboard updated March 2026
         </div>
     </div>
 
     <script>
+        // Keep tooltips within viewport
+        document.addEventListener('mouseover', function(e) {
+            const tip = e.target.closest('.info-tip');
+            if (!tip) return;
+            const tooltip = tip.querySelector('.tooltip');
+            if (!tooltip) return;
+            // Reset to default positioning
+            tooltip.style.left = '-6px';
+            tooltip.style.right = 'auto';
+            // Wait for display, then check bounds
+            requestAnimationFrame(() => {
+                const rect = tooltip.getBoundingClientRect();
+                if (rect.right > window.innerWidth - 8) {
+                    // Overflows right — flip to open leftward
+                    tooltip.style.left = 'auto';
+                    tooltip.style.right = '-6px';
+                }
+                if (rect.left < 8) {
+                    // Overflows left — push right
+                    tooltip.style.left = (-rect.left + 8) + 'px';
+                    tooltip.style.right = 'auto';
+                }
+            });
+        });
+
         // Theme toggle functionality
         function toggleTheme() {
             const html = document.documentElement;
@@ -1713,8 +1593,8 @@
         // Update chart colors for theme
         function updateChartColors() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-            const textColor = isDark ? '#888' : '#666';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+            const textColor = '#888';
 
             if (chart && chart.options) {
                 chart.options.scales.x.grid.color = gridColor;
@@ -1738,7 +1618,7 @@
 
         // Load saved section states
         function loadSectionStates() {
-            const sections = ['retirement-ages', 'rentals', 'home', 'household-assets'];
+            const sections = ['retirement-ages', 'rentals', 'home'];
             sections.forEach(id => {
                 const saved = localStorage.getItem('section-' + id);
                 const section = document.getElementById('section-' + id);
@@ -1750,41 +1630,32 @@
 
         // Base financial data
         const baseData = {
-            // Retirement accounts: $316,088 + PERS IAP $18,000
-            // Brokerage investments: Schwab $91,109 + ComputerShare $56,031 + ETrade $1,555
-            currentPortfolio: 316088 + 18000 + 148695,  // $482,783 total investable
-            cashReserves: 40670,        // Cap One checking/savings, Peak, Selco
-            brokerageBreakdown: {
-                schwab: 91109,          // Individual stocks (AAPL, NVDA, GOOGL, etc.)
-                computerShare: 56031,   // NKE shares
-                etrade: 1555            // E*Trade
-            },
-            vehicleLoans: {
-                tucson: { value: 20825, loanBalance: 2180 },
-                polestar: { value: 17170, loanBalance: 10527 }
-            },
+            currentPortfolio: 321572 + 18000,
             annualExpenses: 113598,
             mikeAge: 44,
+            mikeBirthYear: 1981,
             travisAge: 36,
-            mikeContributions: 19560,
-            travisContributions: 31100,
+            travisBirthYear: 1989,
+            mikeContributions: 23300,
+            mikeSalary: 70000,
+            travisContributions: 36600,
             currentYear: 2026,
             // PERS parameters
             persStartYear: 2022.75,
             currentSalary: 152000,
             persMultiplier: 0.015,
-            // Ownership share of rentals (50/50 with Mike)
-            rentalOwnership: 0.50,
+            // Full household (married, shared finances)
+            rentalOwnership: 1.0,
             // Rental Properties
             rentals: {
                 danebo: {
                     name: "Danebo",
                     address: "526 N Danebo Ave",
                     currentRent: 2095,           // Monthly (just increased Dec 2025)
-                    marketValue: 410100,         // Updated from net worth summary
+                    marketValue: 409900,
                     purchasePrice: 195000,
                     yearPurchased: 2015,
-                    mortgageBalance: 204305,     // Updated from net worth summary
+                    mortgageBalance: 204742,     // Full balance
                     mortgagePayment: 1478.65,    // Monthly P+I+escrow (full)
                     mortgageRate: 0.0375,
                     mortgagePayoff: 2050,        // Standard payoff year
@@ -1798,10 +1669,10 @@
                     name: "Century",
                     address: "3703 Century Dr",
                     currentRent: 2195,           // Monthly
-                    marketValue: 383300,         // Updated from net worth summary
+                    marketValue: 387300,
                     purchasePrice: 224000,
                     yearPurchased: 2017,
-                    mortgageBalance: 173051,     // Updated from net worth summary
+                    mortgageBalance: 173572,     // Full balance
                     mortgagePayment: 1314.49,    // Monthly P+I+escrow (full)
                     mortgageRate: 0.0375,
                     mortgagePayoff: 2050,        // Standard payoff (2044 with current extra)
@@ -1817,8 +1688,8 @@
                 name: "Timberline",
                 address: "2965 Timberline Dr, Eugene",
                 purchasePrice: 351400,
-                currentValue: 489000,            // Updated from net worth summary
-                mortgageBalance: 241938,         // Updated from net worth summary
+                currentValue: 481000,
+                mortgageBalance: 241345,         // Full balance as of Feb 2026
                 mortgagePayment: 1728.51,        // Monthly total (P+I+escrow+shortage)
                 mortgagePI: 1147.65,             // Just P&I portion
                 mortgageRate: 0.0275,            // 2.75% - excellent rate!
@@ -1959,6 +1830,15 @@
             update();
         }
 
+        // Toggle PERS years limit
+        function togglePersYears() {
+            const toggled = document.getElementById('persYearsToggle').checked;
+            const input = document.getElementById('persYears');
+            input.disabled = !toggled;
+            input.style.opacity = toggled ? '1' : '0.4';
+            update();
+        }
+
         // Calculate mortgage payoff year with extra principal
         function calculateMortgagePayoff(balance, monthlyPI, rate, extraPrincipal, currentYear) {
             if (balance <= 0) return currentYear;
@@ -2001,19 +1881,18 @@
                     if (year === sellYear) {
                         const appreciatedValue = prop.marketValue * Math.pow(1 + inputs.propertyAppreciation, sellYear - baseData.currentYear);
                         const gain = appreciatedValue - prop.purchasePrice;
-                        const capGainsTax = gain * 0.19; // 15% federal + ~4% Oregon state
+                        const capGainsTax = gain * 0.15; // 15% capital gains
                         saleProceeds += (appreciatedValue - capGainsTax) * ownership;
                     }
                     return; // No rental income from sold property
                 }
 
                 // Calculate payoff year with extra principal
-                const fullExtraPrincipal = extraPrincipal * 2; // Convert 50% share to full
                 const payoffYear = calculateMortgagePayoff(
                     prop.mortgageBalance,
                     prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12, // Just P&I
                     prop.mortgageRate,
-                    prop.extraPrincipal + fullExtraPrincipal,
+                    extraPrincipal,
                     baseData.currentYear
                 );
 
@@ -2032,10 +1911,12 @@
                 const taxes = prop.propertyTax * Math.pow(1.02, yearsFromNow); // 2% annual increase
                 const insurance = prop.insurance * Math.pow(1.02, yearsFromNow);
 
-                // Mortgage (0 if paid off)
+                // Mortgage P&I only (0 if paid off)
+                // Use P&I portion only since tax and insurance are already counted separately above
                 let mortgageCost = 0;
                 if (year < payoffYear) {
-                    mortgageCost = prop.mortgagePayment * 12;
+                    const monthlyPI = prop.mortgagePayment - (prop.propertyTax + prop.insurance) / 12;
+                    mortgageCost = monthlyPI * 12;
                 }
 
                 // Furnace loan (Danebo only)
@@ -2047,7 +1928,6 @@
                 // Net operating income (full property)
                 const noi = effectiveRent - management - maintenance - taxes - insurance - mortgageCost - furnaceCost;
 
-                // Your 50% share
                 const netIncome = noi * ownership;
 
                 if (propKey === 'danebo') {
@@ -2101,19 +1981,31 @@
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                r.daneboExtraPrincipal,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                r.centuryExtraPrincipal,
                 baseData.currentYear
             );
 
             document.getElementById('daneboPayoff').textContent = r.daneboSell ? 'Selling ' + r.daneboSellYear : daneboPayoff;
             document.getElementById('centuryPayoff').textContent = r.centurySell ? 'Selling ' + r.centurySellYear : '~' + centuryPayoff;
+
+            // Update equity
+            const daneboEquity = baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance;
+            const centuryEquity = baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance;
+            document.getElementById('daneboEquity').textContent = formatCurrency(daneboEquity);
+            document.getElementById('centuryEquity').textContent = formatCurrency(centuryEquity);
+
+            // Update after-payoff monthly costs (tax + insurance only)
+            const daneboPostPayoff = (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12;
+            const centuryPostPayoff = (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12;
+            document.getElementById('daneboPostPayoff').textContent = formatCurrency(daneboPostPayoff) + '/mo';
+            document.getElementById('centuryPostPayoff').textContent = formatCurrency(centuryPostPayoff) + '/mo';
 
             // Calculate current year net income
             const currentIncome = calculateRentalIncomeForYear(baseData.currentYear, r);
@@ -2137,8 +2029,8 @@
                 const yearsToSell = r.daneboSellYear - baseData.currentYear;
                 const saleValue = baseData.rentals.danebo.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.danebo.purchasePrice;
-                const tax = gain * 0.19; // 15% federal + ~4% Oregon
-                const netProceeds = (saleValue - tax) * 0.5;
+                const tax = gain * 0.15;
+                const netProceeds = saleValue - tax;
 
                 // Auto-populate invest amount if empty
                 const daneboInvestInput = document.getElementById('daneboInvestAmount');
@@ -2155,17 +2047,17 @@
                 }
 
                 document.getElementById('daneboCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~19%): ${formatCurrency(tax * 0.5)}<br>` +
-                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+                    `Sale value: ${formatCurrency(saleValue)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax)}<br>` +
+                    `Net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
 
             if (r.centurySell) {
                 const yearsToSell = r.centurySellYear - baseData.currentYear;
                 const saleValue = baseData.rentals.century.marketValue * Math.pow(1 + r.propertyAppreciation, yearsToSell);
                 const gain = saleValue - baseData.rentals.century.purchasePrice;
-                const tax = gain * 0.19; // 15% federal + ~4% Oregon
-                const netProceeds = (saleValue - tax) * 0.5;
+                const tax = gain * 0.15;
+                const netProceeds = saleValue - tax;
 
                 // Auto-populate invest amount if empty
                 const centuryInvestInput = document.getElementById('centuryInvestAmount');
@@ -2182,9 +2074,9 @@
                 }
 
                 document.getElementById('centuryCapGains').innerHTML =
-                    `Sale value: ${formatCurrency(saleValue * 0.5)}<br>` +
-                    `Cap gains tax (~19%): ${formatCurrency(tax * 0.5)}<br>` +
-                    `Household net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
+                    `Sale value: ${formatCurrency(saleValue)}<br>` +
+                    `Cap gains tax (~15%): ${formatCurrency(tax)}<br>` +
+                    `Net proceeds: ${formatCurrency(netProceeds)}` + investStatus;
             }
         }
 
@@ -2196,12 +2088,11 @@
             const home = baseData.primaryResidence;
 
             // Calculate home payoff year with extra principal
-            const fullExtraPrincipal = homeExtraPrincipal * 2;
             const homePayoff = calculateMortgagePayoff(
                 home.mortgageBalance,
                 home.mortgagePI,
                 home.mortgageRate,
-                fullExtraPrincipal,
+                homeExtraPrincipal,
                 baseData.currentYear
             );
             document.getElementById('homePayoff').textContent = '~' + homePayoff;
@@ -2226,7 +2117,7 @@
                 const monthlyRate = home.mortgageRate / 12;
                 for (let m = 0; m < monthsToSell && remainingMortgage > 0; m++) {
                     const interest = remainingMortgage * monthlyRate;
-                    const principal = monthlyPI - interest + (fullExtraPrincipal / 12);
+                    const principal = monthlyPI - interest + homeExtraPrincipal;
                     remainingMortgage = Math.max(0, remainingMortgage - principal);
                 }
 
@@ -2236,9 +2127,8 @@
                 // Capital gains (with $500K married couple exclusion for primary residence)
                 const gain = appreciatedValue - home.purchasePrice;
                 const taxableGain = Math.max(0, gain - 500000); // $500K exclusion
-                const capGainsTax = taxableGain * 0.19; // 15% federal + ~4% Oregon state
+                const capGainsTax = taxableGain * 0.15;
 
-                // Net proceeds (household 50% share)
                 const netProceeds = (grossProceeds - capGainsTax) * ownership;
 
                 // Auto-populate invest amount field if it's 0 or empty
@@ -2261,7 +2151,7 @@
                     `Home value: ${formatCurrency(appreciatedValue)} (${(r.propertyAppreciation*100).toFixed(1)}%/yr appreciation)<br>` +
                     `Remaining mortgage: ${formatCurrency(remainingMortgage)}<br>` +
                     `Capital gains tax: ${formatCurrency(capGainsTax)} ${taxableGain === 0 ? '($500K exclusion applies)' : ''}<br>` +
-                    `<strong>Household net proceeds: ${formatCurrency(netProceeds)}</strong><br>` +
+                    `<strong>Net proceeds: ${formatCurrency(netProceeds)}</strong><br>` +
                     investStatus;
             }
 
@@ -2270,45 +2160,46 @@
                 baseData.rentals.danebo.mortgageBalance,
                 baseData.rentals.danebo.mortgagePayment - (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) / 12,
                 baseData.rentals.danebo.mortgageRate,
-                baseData.rentals.danebo.extraPrincipal + (r.daneboExtraPrincipal * 2),
+                r.daneboExtraPrincipal,
                 baseData.currentYear
             );
             const centuryPayoff = calculateMortgagePayoff(
                 baseData.rentals.century.mortgageBalance,
                 baseData.rentals.century.mortgagePayment - (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance) / 12,
                 baseData.rentals.century.mortgageRate,
-                baseData.rentals.century.extraPrincipal + (r.centuryExtraPrincipal * 2),
+                r.centuryExtraPrincipal,
                 baseData.currentYear
             );
 
-            // Total real estate value
-            const totalValue = home.currentValue + baseData.rentals.danebo.marketValue + baseData.rentals.century.marketValue;
+            // Total real estate value (exclude sold properties)
+            let totalValue = 0;
+            let totalEquity = 0;
+            let totalMortgages = 0;
+            let allPostPayoff = 0;
+
+            if (!r.homeSell) {
+                totalValue += home.currentValue;
+                totalEquity += homeEquity;
+                totalMortgages += home.mortgagePayment;
+                allPostPayoff += home.propertyTax + home.insurance;
+            }
+            if (!r.daneboSell) {
+                totalValue += baseData.rentals.danebo.marketValue;
+                totalEquity += (baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance);
+                totalMortgages += baseData.rentals.danebo.mortgagePayment;
+                allPostPayoff += baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance;
+            }
+            if (!r.centurySell) {
+                totalValue += baseData.rentals.century.marketValue;
+                totalEquity += (baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance);
+                totalMortgages += baseData.rentals.century.mortgagePayment;
+                allPostPayoff += baseData.rentals.century.propertyTax + baseData.rentals.century.insurance;
+            }
+
             document.getElementById('totalRealEstateValue').textContent = formatCurrency(totalValue);
-
-            // Total equity (household 50%)
-            const totalEquity = homeEquity +
-                ((baseData.rentals.danebo.marketValue - baseData.rentals.danebo.mortgageBalance) * ownership) +
-                ((baseData.rentals.century.marketValue - baseData.rentals.century.mortgageBalance) * ownership);
             document.getElementById('totalEquity').textContent = formatCurrency(totalEquity);
-
-            // Total monthly mortgage payments (household 50%)
-            const totalMortgages = (home.mortgagePayment + baseData.rentals.danebo.mortgagePayment + baseData.rentals.century.mortgagePayment) * ownership;
             document.getElementById('totalMortgages').textContent = formatCurrency(totalMortgages) + '/mo';
-
-            // Post-payoff costs (all properties - just tax + insurance)
-            const allPostPayoff = (
-                (home.propertyTax + home.insurance) +
-                (baseData.rentals.danebo.propertyTax + baseData.rentals.danebo.insurance) +
-                (baseData.rentals.century.propertyTax + baseData.rentals.century.insurance)
-            ) / 12 * ownership;
-            document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff) + '/mo';
-
-            // Dynamic net worth calculation
-            const vehicleEquity = (baseData.vehicleLoans.tucson.value - baseData.vehicleLoans.tucson.loanBalance) +
-                (baseData.vehicleLoans.polestar.value - baseData.vehicleLoans.polestar.loanBalance);
-            const netWorth = totalEquity + baseData.currentPortfolio + baseData.cashReserves + vehicleEquity;
-            document.getElementById('netWorthCard').textContent = formatCurrency(netWorth);
-            document.getElementById('netWorthTotal').textContent = formatCurrency(netWorth);
+            document.getElementById('postPayoffCosts').textContent = '~' + formatCurrency(allPostPayoff / 12) + '/mo';
         }
 
         // Calculate mortgage savings for a specific year (how much less expense due to payoffs)
@@ -2323,11 +2214,11 @@
             // Home mortgage payoff
             const homePayoff = calculateMortgagePayoff(
                 home.mortgageBalance, home.mortgagePI, home.mortgageRate,
-                homeExtraPrincipal * 2, baseData.currentYear
+                homeExtraPrincipal, baseData.currentYear
             );
             if (year >= homePayoff) {
                 // Mortgage paid off - save the P&I portion (escrow/tax/ins still owed)
-                savings += home.mortgagePI * 12 * ownership;
+                savings += home.mortgagePI * 12;
             }
 
             // Danebo payoff (not counted in expenses since it's a rental)
@@ -2348,7 +2239,8 @@
 
         // Calculate portfolio with dynamic contributions (stops when each person retires)
         // Supports multiple contribution changes: array of {person, year, amount} objects
-        function calculatePortfolioWithRetirements(years, returnRate, contribGrowth, mikeRetireYear, travisRetireYear, mikeContribStart, travisContribStart, changes = []) {
+        // withdrawalRate: annual withdrawal rate applied post-retirement to model portfolio drawdown
+        function calculatePortfolioWithRetirements(years, returnRate, contribGrowth, mikeRetireYear, travisRetireYear, mikeContribStart, travisContribStart, changes = [], withdrawalRate = 0) {
             let value = baseData.currentPortfolio;
             let mikeContrib = mikeContribStart;
             let travisContrib = travisContribStart;
@@ -2411,6 +2303,20 @@
                 const growth = (value + yearContrib / 2) * returnRate;
                 value = value + yearContrib + growth + saleProceeds;
 
+                // Deduct withdrawals post-retirement
+                let withdrawal = 0;
+                if (mikeRetired && travisRetired) {
+                    // Both retired: full withdrawal rate
+                    withdrawal = value * withdrawalRate;
+                } else if (mikeRetired) {
+                    // Only Mike retired: ~40% of full withdrawal (his portion)
+                    withdrawal = value * withdrawalRate * 0.4;
+                } else if (travisRetired) {
+                    // Only Travis retired: ~30% of full withdrawal (has pension)
+                    withdrawal = value * withdrawalRate * 0.3;
+                }
+                value = Math.max(0, value - withdrawal);
+
                 projections.push({
                     year: i,
                     calendarYear: calYear,
@@ -2420,6 +2326,7 @@
                     mikeRetired: mikeRetired,
                     travisRetired: travisRetired,
                     contribution: yearContrib,
+                    withdrawal: withdrawal,
                     mikeContrib: mikeRetired ? 0 : mikeContrib,
                     travisContrib: travisRetired ? 0 : travisContrib
                 });
@@ -2440,7 +2347,7 @@
         //   travisRetireAge: age when Travis stops working (leaves PERS employment)
         //   salaryGrowthRate: annual salary growth rate
         //   currentAge: Travis's current age at this point in the projection (for deferred collection)
-        function calculatePERSPension(travisRetireAge, salaryGrowthRate, currentAge = null) {
+        function calculatePERSPension(travisRetireAge, salaryGrowthRate, currentAge = null, maxPersYears = null) {
             const normalRetireAge = 65;
             const earlyFullRetireAge = 58; // if 30+ years service
             const earliestCollectionAge = 55;
@@ -2448,10 +2355,18 @@
             // Years of service = time worked at PERS employer (stops when you leave, regardless of collection age)
             const yearsWorked = travisRetireAge - baseData.travisAge;
             const lastWorkYear = baseData.currentYear + yearsWorked;
-            const yearsOfService = lastWorkYear - baseData.persStartYear;
+            let yearsOfService = lastWorkYear - baseData.persStartYear;
 
-            // Final Average Salary based on when you STOP working
-            const fas = baseData.currentSalary * Math.pow(1 + salaryGrowthRate, yearsWorked);
+            // If user specified a PERS years cap, they may leave PERS before retirement
+            let persYearsWorked = yearsWorked; // years of PERS employment for FAS calc
+            if (maxPersYears !== null && maxPersYears < yearsOfService) {
+                yearsOfService = maxPersYears;
+                persYearsWorked = maxPersYears - (baseData.currentYear - baseData.persStartYear);
+                persYearsWorked = Math.max(0, persYearsWorked); // can't be negative
+            }
+
+            // Final Average Salary based on when you leave PERS employment (not necessarily overall retirement)
+            const fas = baseData.currentSalary * Math.pow(1 + salaryGrowthRate, persYearsWorked);
 
             // Base pension before any reduction (based on years worked, not collection age)
             const basePension = baseData.persMultiplier * yearsOfService * fas;
@@ -2527,11 +2442,20 @@
         }
 
         // Calculate Social Security (reduced if taken early)
+        // SSA actual formula: 5/9 of 1% per month for first 36 months early (6.67%/yr),
+        // then 5/12 of 1% per month for additional months (5%/yr) up to 60 months early
         function calculateSS(fullBenefit, claimAge) {
             if (claimAge >= 67) return fullBenefit * 12;
             if (claimAge >= 62) {
-                // Roughly 6.67% reduction per year before 67
-                const reduction = (67 - claimAge) * 0.0667;
+                const monthsEarly = (67 - claimAge) * 12;
+                let reduction = 0;
+                if (monthsEarly <= 36) {
+                    // First 36 months: 5/9 of 1% per month
+                    reduction = monthsEarly * (5 / 9 / 100);
+                } else {
+                    // First 36 months at 5/9 of 1%, remaining at 5/12 of 1%
+                    reduction = 36 * (5 / 9 / 100) + (monthsEarly - 36) * (5 / 12 / 100);
+                }
                 return fullBenefit * 12 * (1 - reduction);
             }
             return 0; // Can't claim before 62
@@ -2548,11 +2472,10 @@
                 returnRate: parseFloat(document.getElementById('returnRate').value) / 100,
                 inflationRate: parseFloat(document.getElementById('inflationRate').value) / 100,
                 withdrawalRate: parseFloat(document.getElementById('withdrawalRate').value) / 100,
-                federalTaxRate: parseFloat(document.getElementById('federalTaxRate').value) / 100,
-                oregonTaxRate: parseFloat(document.getElementById('oregonTaxRate').value) / 100,
                 expenseReduction: parseFloat(document.getElementById('expenseReduction').value) / 100,
                 contribIncrease: parseFloat(document.getElementById('contribIncrease').value) / 100,
                 salaryGrowth: parseFloat(document.getElementById('salaryGrowth').value) / 100,
+                persYears: document.getElementById('persYearsToggle').checked ? parseFloat(document.getElementById('persYears').value) || 10 : null,
                 healthcareCost: parseFloat(document.getElementById('healthcareCost').value),
                 oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value),
                 mikeSs: parseFloat(document.getElementById('mikeSs').value),
@@ -2567,7 +2490,7 @@
 
             // Project portfolio for 35 years
             // Build step changes object
-            const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges);
+            const projections = calculatePortfolioWithRetirements(35, v.returnRate, v.contribIncrease, mikeRetireYear, travisRetireYear, v.mikeContrib, v.travisContrib, v.contributionChanges, v.withdrawalRate);
 
             // Calculate phases
             const phases = [];
@@ -2619,7 +2542,7 @@
                 let pensionReduction = '';
                 if (travisRetired) {
                     // Pass current travisAge to check if pension collection has started
-                    const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge);
+                    const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge, v.persYears);
                     pension = persCalc.annualPension;
                     if (persCalc.earlyRetireFactor < 1.0 || !persCalc.collecting) {
                         pensionReduction = persCalc.reductionNote;
@@ -2645,47 +2568,26 @@
                     portfolioIncome = Math.min(gap, proj.value * v.withdrawalRate * 0.3);
                 }
 
-                // Social Security (calculated before tax)
-                let ssGross = 0;
-                if (mikeAge >= 67) ssGross += v.mikeSs * 12;
-                if (travisAge >= 67) ssGross += v.travisSs * 12;
+                // Social Security
+                let ssIncome = 0;
+                if (mikeAge >= 67) ssIncome += v.mikeSs * 12;
+                if (travisAge >= 67) ssIncome += v.travisSs * 12;
 
-                // Rental Income (your 50% share) - calculated before tax
+                // Rental Income
                 const rentalInputs = getRentalInputValues();
                 const rentalCalc = calculateRentalIncomeForYear(year, rentalInputs);
-                let rentalGross = rentalCalc.totalNetIncome; // "net" of expenses, but pre-income-tax
+                let rentalIncome = rentalCalc.totalNetIncome;
                 let rentalSaleProceeds = rentalCalc.saleProceeds;
-
-                // === TAX CALCULATIONS ===
-                // Save pre-tax values for SS threshold check
-                const pensionGross = pension;
-                const portfolioGross = portfolioIncome;
-                const combinedRate = v.federalTaxRate + v.oregonTaxRate;
-
-                // Federal + Oregon tax on pension and portfolio withdrawals
-                pension = pension * (1 - combinedRate);
-                portfolioIncome = portfolioIncome * (1 - combinedRate);
-
-                // Federal + Oregon tax on rental income (positive rental income is taxable)
-                let rentalIncome = rentalGross > 0 ? rentalGross * (1 - combinedRate) : rentalGross;
-
-                // Federal tax on Social Security: ~85% taxable above $44K combined income
-                // Use PRE-TAX gross income for threshold comparison
-                let ssIncome = ssGross;
-                const grossIncomeForSSTest = pensionGross + portfolioGross + ssGross + Math.max(0, rentalGross);
-                if (ssGross > 0 && grossIncomeForSSTest > 44000) {
-                    // 85% of SS is federally taxable (Oregon does NOT tax SS)
-                    ssIncome = ssGross - (ssGross * 0.85 * v.federalTaxRate);
-                }
 
                 // Expenses (inflation adjusted)
                 let expenses = baseRetirementExpenses * Math.pow(1 + v.inflationRate, yearsFromNow);
 
                 // Add healthcare costs for each retired person before Medicare (65)
-                // Healthcare cost input is per-person
+                // Healthcare cost input is per-person in today's dollars, inflation-adjusted
+                const inflatedHealthcare = v.healthcareCost * Math.pow(1 + v.inflationRate, yearsFromNow);
                 let healthcareNeeded = 0;
-                if (mikeRetired && mikeAge < 65) healthcareNeeded += v.healthcareCost;
-                if (travisRetired && travisAge < 65) healthcareNeeded += v.healthcareCost;
+                if (mikeRetired && mikeAge < 65) healthcareNeeded += inflatedHealthcare;
+                if (travisRetired && travisAge < 65) healthcareNeeded += inflatedHealthcare;
                 expenses += healthcareNeeded;
 
                 // Subtract mortgage savings when home mortgage is paid off
@@ -2698,7 +2600,8 @@
                 const prevBothRetired = (prevPhaseYear > mikeRetireYear) && (prevPhaseYear > travisRetireYear);
                 if (bothRetired && !prevBothRetired) {
                     // This is first phase of full retirement - spread one-time over ~5 years
-                    expenses += v.oneTimeExpenses / 5;
+                    // Inflation-adjust from today's dollars to future dollars
+                    expenses += (v.oneTimeExpenses * Math.pow(1 + v.inflationRate, yearsFromNow)) / 5;
                 }
 
                 const totalIncome = pension + portfolioIncome + ssIncome + rentalIncome;
@@ -2728,8 +2631,19 @@
         }
 
         function renderScenarios(phases) {
+            const v = getInputValues();
+            const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+
             const tbody = document.getElementById('scenariosBody');
-            tbody.innerHTML = phases.map(p => `
+            tbody.innerHTML = phases.map(p => {
+                const mikeRetired = p.year >= mikeRetireYear;
+                const travisRetired = p.year >= travisRetireYear;
+                const bothRetired = mikeRetired && travisRetired;
+                const oneWorking = (mikeRetired || travisRetired) && !bothRetired;
+                const whoWorking = oneWorking ? (mikeRetired ? 'Travis' : 'Mike') : '';
+
+                return `
                 <tr class="${p.label.includes('Travis retires') ? 'highlight-row' : ''}">
                     <td>
                         ${p.label}<br>
@@ -2741,19 +2655,22 @@
                         ${p.pension > 0 ? `PERS: ${formatCurrency(p.pension)}${p.pensionReduction ? `<br><span style="color:#f87171;font-size:0.6rem">${p.pensionReduction}</span>` : ''}<br>` : ''}
                         ${p.portfolioIncome > 0 ? `Port: ${formatCurrency(p.portfolioIncome)}<br>` : ''}
                         ${p.ssIncome > 0 ? `SS: ${formatCurrency(p.ssIncome)}<br>` : ''}
-                        ${p.rentalIncome !== undefined ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
+                        ${p.rentalIncome !== undefined && (p.rentalIncome !== 0 || bothRetired) ? `<span style="color:#fb923c">Rental: ${formatCurrency(p.rentalIncome)}</span>` : ''}
                         ${p.rentalSaleProceeds > 0 ? `<br><span style="color:#fbbf24;font-size:0.6rem">+Sale: ${formatCurrency(p.rentalSaleProceeds)}</span>` : ''}
-                        ${p.totalIncome === 0 ? '<span style="color:var(--text-secondary)">Still working</span>' : ''}
+                        ${!mikeRetired && !travisRetired ? '<span style="color:var(--text-secondary)">Both working</span>' : ''}
+                        ${oneWorking ? `<br><span style="color:var(--text-secondary);font-size:0.6rem">${whoWorking} still earning salary</span>` : ''}
                     </td>
                     <td>
-                        ${p.totalIncome > 0 || p.rentalIncome !== 0 ? `
+                        ${bothRetired ? `
                             <span class="success-badge ${p.status}">
                                 ${p.surplus >= 0 ? '+' : ''}${formatCurrency(p.surplus)}
                             </span>
+                        ` : oneWorking ? `
+                            <span style="color:var(--text-secondary);font-size:0.65rem;">Salary covers gap</span>
                         ` : '<span style="color:var(--text-secondary)">—</span>'}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function renderChart(projections, mikeRetireYear, travisRetireYear) {
@@ -2815,12 +2732,20 @@
                                 },
                                 label: function(context) {
                                     const p = projections[context.dataIndex];
-                                    return [
+                                    const yearsOut = p.calendarYear - baseData.currentYear;
+                                    const baseExp = baseData.annualExpenses * (1 - v.expenseReduction);
+                                    const estExpenses = baseExp * Math.pow(1 + v.inflationRate, yearsOut);
+                                    const lines = [
                                         `Mike: Age ${p.mikeAge}${p.mikeRetired ? ' (retired)' : ''}`,
                                         `Travis: Age ${p.travisAge}${p.travisRetired ? ' (retired)' : ''}`,
+                                        '',
                                         `Portfolio: ${formatCurrency(p.value)}`,
-                                        p.contribution !== undefined ? `Contributing: ${formatCurrency(p.contribution)}/yr` : ''
-                                    ].filter(Boolean);
+                                        p.contribution > 0 ? `Contributing: ${formatCurrency(p.contribution)}/yr` : null,
+                                        p.withdrawal > 0 ? `Withdrawing: ${formatCurrency(p.withdrawal)}/yr` : null,
+                                        '',
+                                        `Est. Expenses: ${formatCurrency(estExpenses)}/yr`
+                                    ];
+                                    return lines.filter(l => l !== null);
                                 }
                             }
                         },
@@ -2879,23 +2804,34 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: {
+                                color: document.documentElement.getAttribute('data-theme') === 'dark'
+                                    ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+                            },
                             ticks: {
-                                color: '#666',
-                                maxTicksLimit: 10,
+                                color: '#888',
+                                maxTicksLimit: 12,
+                                autoSkip: true,
+                                maxRotation: 0,
                                 callback: function(value, index) {
                                     const p = projections[index];
-                                    if (p.calendarYear === mikeRetireYear) return `${p.calendarYear}\n(M:${p.mikeAge})`;
-                                    if (p.calendarYear === travisRetireYear) return `${p.calendarYear}\n(T:${p.travisAge})`;
-                                    return index % 5 === 0 ? p.calendarYear : '';
+                                    if (p.calendarYear === mikeRetireYear) return `${p.calendarYear} (M:${p.mikeAge})`;
+                                    if (p.calendarYear === travisRetireYear) return `${p.calendarYear} (T:${p.travisAge})`;
+                                    if (p.calendarYear % 5 === 0) return p.calendarYear;
+                                    return '';
                                 }
                             }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: {
+                                color: document.documentElement.getAttribute('data-theme') === 'dark'
+                                    ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+                            },
                             ticks: {
-                                color: '#666',
-                                callback: value => '$' + (value / 1000000).toFixed(1) + 'M'
+                                color: '#888',
+                                callback: value => value >= 1000000
+                                    ? '$' + (value / 1000000).toFixed(1) + 'M'
+                                    : '$' + (value / 1000).toFixed(0) + 'K'
                             }
                         }
                     }
@@ -2903,16 +2839,21 @@
             });
         }
 
-        function renderIncomeBar(phases) {
-            // Find the phase where BOTH people have retired (full retirement)
-            // Need to find a phase where both pension > 0 and portfolioIncome > 0
-            // OR the last phase if that has income
-            let fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
-
-            // If no phase has both, check if the last phase has any income
-            if (!fullRetirePhase) {
-                fullRetirePhase = phases[phases.length - 1];
+        function findFullRetirePhase(phases) {
+            const v = getInputValues();
+            const mikeRetireYear = baseData.currentYear + (v.mikeRetireAge - baseData.mikeAge);
+            const travisRetireYear = baseData.currentYear + (v.travisRetireAge - baseData.travisAge);
+            // Find the first phase where BOTH people have retired
+            let phase = phases.find(p => p.year >= mikeRetireYear && p.year >= travisRetireYear && p.totalIncome > 0);
+            // Fallback to last phase with any income
+            if (!phase) {
+                phase = [...phases].reverse().find(p => p.totalIncome > 0);
             }
+            return phase || phases[phases.length - 1];
+        }
+
+        function renderIncomeBar(phases) {
+            let fullRetirePhase = findFullRetirePhase(phases);
 
             if (!fullRetirePhase || fullRetirePhase.totalIncome === 0) {
                 document.getElementById('incomeBar').innerHTML = '<div style="width:100%;background:#333;color:var(--text-secondary);font-size:0.8rem;">Select retirement ages to see income breakdown</div>';
@@ -2986,13 +2927,21 @@
 
             // Find Travis retirement phase for pension preview
             // Don't pass currentAge here - we want to show what pension will be when collecting
-            const pers = calculatePERSPension(v.travisRetireAge, v.salaryGrowth);
+            const pers = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, null, v.persYears);
             document.getElementById('pensionPreview').textContent = formatCurrency(pers.annualPension) + '/yr';
 
             // Show when collection starts
-            const collectionNote = v.travisRetireAge < 55
-                ? `${pers.yearsOfService.toFixed(1)} yrs service, collect at 55`
-                : `${pers.yearsOfService.toFixed(1)} yrs service at age ${v.travisRetireAge}`;
+            const persLimited = v.persYears !== null && v.persYears < (v.travisRetireAge - baseData.travisAge + (baseData.currentYear - baseData.persStartYear));
+            let collectionNote = '';
+            if (v.travisRetireAge < 55) {
+                collectionNote = `${pers.yearsOfService.toFixed(1)} yrs service, collect at 55`;
+            } else {
+                collectionNote = `${pers.yearsOfService.toFixed(1)} yrs service at age ${v.travisRetireAge}`;
+            }
+            if (persLimited) {
+                const leaveAge = Math.round(baseData.travisAge + (v.persYears - (baseData.currentYear - baseData.persStartYear)));
+                collectionNote += ` (leave PERS ~age ${leaveAge})`;
+            }
             document.getElementById('pensionSubtext').textContent = collectionNote;
 
             // Show early retirement reduction if applicable
@@ -3006,9 +2955,22 @@
                 reductionEl.style.color = '#4ade80';
             }
 
-            // Find full retirement phase
-            const fullRetirePhase = phases.find(p => p.pension > 0 && p.portfolioIncome > 0);
-            if (fullRetirePhase) {
+            // Update PERS info card dynamically
+            const persInfoCard = document.getElementById('persInfoCard');
+            if (persInfoCard) {
+                const persYrsNow = (baseData.currentYear - baseData.persStartYear).toFixed(1);
+                let persInfoHtml = `Formula: 1.5% × years × final avg salary<br>`;
+                persInfoHtml += `Started: Oct 2022 | Vesting: Oct 2027<br>`;
+                persInfoHtml += `Current salary: $152,000 | Service so far: ${persYrsNow} yrs`;
+                if (persLimited) {
+                    persInfoHtml += `<br><span style="color:#fbbf24;">⚠ Planned: ${pers.yearsOfService.toFixed(1)} yrs total (FAS: ${formatCurrency(pers.fas)})</span>`;
+                }
+                persInfoCard.innerHTML = persInfoHtml;
+            }
+
+            // Find full retirement phase (both retired with income)
+            const fullRetirePhase = findFullRetirePhase(phases);
+            if (fullRetirePhase && fullRetirePhase.totalIncome > 0) {
                 document.getElementById('totalIncomePreview').textContent = formatCurrency(fullRetirePhase.totalIncome) + '/yr';
                 const gap = fullRetirePhase.surplus;
                 document.getElementById('gapValue').textContent = (gap >= 0 ? '+' : '') + formatCurrency(gap);
@@ -3059,6 +3021,89 @@
             }
         }
 
+        function calculateEarliestSharedRetireAge() {
+            const v = getInputValues();
+            const mikeBY = baseData.mikeBirthYear;
+            const travisBY = baseData.travisBirthYear;
+
+            // Try ages from 50 to 67
+            for (let age = 50; age <= 67; age++) {
+                const mikeRetireYear = mikeBY + age;
+                const travisRetireYear = travisBY + age;
+
+                // Both must be in the future
+                if (mikeRetireYear <= baseData.currentYear || travisRetireYear <= baseData.currentYear) continue;
+
+                const mikeRetireAge = age;
+                const travisRetireAge = age;
+
+                // Calculate projections with these retire ages
+                const projections = calculatePortfolioWithRetirements(
+                    40, v.returnRate, v.contribIncrease,
+                    mikeRetireYear, travisRetireYear,
+                    v.mikeContrib, v.travisContrib,
+                    v.contributionChanges, v.withdrawalRate
+                );
+
+                // Find portfolio value when both are retired (the later retire year)
+                const bothRetiredYear = Math.max(mikeRetireYear, travisRetireYear);
+                const proj = projections.find(p => p.calendarYear === bothRetiredYear);
+                if (!proj) continue;
+
+                // Calculate income at this point
+                const baseExpenses = baseData.annualExpenses * (1 - v.expenseReduction);
+                const portfolioIncome = proj.value * v.withdrawalRate;
+
+                // PERS pension
+                const persCalc = calculatePERSPension(travisRetireAge, v.salaryGrowth, travisRetireAge, v.persYears);
+                const pension = persCalc.annualPension;
+
+                // Social Security (only if >= 62)
+                let mikeSS = 0, travisSS = 0;
+                if (mikeRetireAge >= 67) mikeSS = v.mikeSs * 12;
+                if (travisRetireAge >= 67) travisSS = v.travisSs * 12;
+
+                // Rental income (simplified — use current net)
+                const rentalIncome = proj.rentalIncome || 0;
+
+                const totalIncome = portfolioIncome + pension + mikeSS + travisSS + rentalIncome;
+                const surplus = totalIncome - baseExpenses;
+
+                if (surplus >= 0) {
+                    return {
+                        age: age,
+                        mikeYear: mikeRetireYear,
+                        travisYear: travisRetireYear,
+                        surplus: surplus,
+                        totalIncome: totalIncome,
+                        expenses: baseExpenses,
+                        portfolioValue: proj.value
+                    };
+                }
+            }
+            return null; // Can't retire at same age within range
+        }
+
+        function updateSharedRetireCard() {
+            const result = calculateEarliestSharedRetireAge();
+            const ageEl = document.getElementById('sharedRetireAge');
+            const detailEl = document.getElementById('sharedRetireDetail');
+
+            if (result) {
+                ageEl.textContent = result.age;
+                ageEl.style.color = '#4ade80';
+                detailEl.innerHTML = `
+                    Mike retires <strong>${result.mikeYear}</strong> · Travis retires <strong>${result.travisYear}</strong><br>
+                    Portfolio: ${formatCurrency(result.portfolioValue)} · Income: ${formatCurrency(result.totalIncome)}/yr<br>
+                    <span style="color:#4ade80;">Surplus: +${formatCurrency(result.surplus)}/yr</span>
+                `;
+            } else {
+                ageEl.textContent = '67+';
+                ageEl.style.color = '#f87171';
+                detailEl.innerHTML = `Cannot retire at the same age (50–67) with current settings.<br>Consider increasing contributions or reducing expenses.`;
+            }
+        }
+
         function update() {
             updateDisplays();
             updateRentalDisplays();
@@ -3068,6 +3113,7 @@
             renderChart(projections, mikeRetireYear, travisRetireYear);
             renderIncomeBar(phases);
             updateSummaryCards(phases);
+            updateSharedRetireCard();
         }
 
         // Event listeners
@@ -3087,5 +3133,6 @@
         renderChangesTable();
         update();
     </script>
+    </div><!-- end main-content -->
 </body>
 </html>
