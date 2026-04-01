@@ -1627,6 +1627,23 @@
                 </div>
                 <div class="control-group">
                     <div class="control-label">
+                        <span>Limit PERS Years</span>
+                        <span class="info-tip">?<span class="tooltip">Toggle on if Travis might leave PERS employment before retirement. When enabled, set the total years in PERS (started Oct 2022). The pension freezes at the years accrued. Formula: 1.5% × total years × final avg salary at time of leaving.</span></span>
+                    </div>
+                    <div class="input-group" style="gap: 8px;">
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);">
+                            <input type="checkbox" id="persYearsToggle" style="accent-color: #fbbf24;">
+                            Cap at
+                        </label>
+                        <input type="number" id="persYears" min="1" max="40" step="1" value="10" style="width:55px;" disabled>
+                        <span class="unit">total yrs</span>
+                    </div>
+                    <div class="helper-text" id="persYearsHelper" style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">
+                        Currently: <span id="persYearsCurrent">3.3</span> yrs in PERS (since Oct 2022)
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
                         <span>Pre-Medicare Healthcare (per person)</span>
                         <span class="info-tip">?<span class="tooltip">Annual cost for health insurance before age 65 (Medicare eligibility). ACA marketplace plans can be $12,000-20,000/person. After 65, this drops significantly.</span></span>
                     </div>
@@ -3137,7 +3154,7 @@
         //   travisRetireAge: age when Travis stops working (leaves PERS employment)
         //   salaryGrowthRate: annual salary growth rate
         //   currentAge: Travis's current age at this point in the projection (for deferred collection)
-        function calculatePERSPension(travisRetireAge, salaryGrowthRate, currentAge = null) {
+        function calculatePERSPension(travisRetireAge, salaryGrowthRate, currentAge = null, maxPersYears = null) {
             const normalRetireAge = 65;
             const earlyFullRetireAge = 58; // if 30+ years service
             const earliestCollectionAge = 55;
@@ -3145,10 +3162,18 @@
             // Years of service = time worked at PERS employer (stops when you leave, regardless of collection age)
             const yearsWorked = travisRetireAge - baseData.travisAge;
             const lastWorkYear = baseData.currentYear + yearsWorked;
-            const yearsOfService = lastWorkYear - baseData.persStartYear;
+            let yearsOfService = lastWorkYear - baseData.persStartYear;
 
-            // Final Average Salary based on when you STOP working
-            const fas = baseData.currentSalary * Math.pow(1 + salaryGrowthRate, yearsWorked);
+            // If user specified a PERS years cap, they may leave PERS before retirement
+            let persYearsWorked = yearsWorked; // years of PERS employment for FAS calc
+            if (maxPersYears !== null && maxPersYears < yearsOfService) {
+                yearsOfService = maxPersYears;
+                persYearsWorked = maxPersYears - (baseData.currentYear - baseData.persStartYear);
+                persYearsWorked = Math.max(0, persYearsWorked);
+            }
+
+            // Final Average Salary based on when you leave PERS employment (not necessarily overall retirement)
+            const fas = baseData.currentSalary * Math.pow(1 + salaryGrowthRate, persYearsWorked);
 
             // Base pension before any reduction (based on years worked, not collection age)
             const basePension = baseData.persMultiplier * yearsOfService * fas;
@@ -3252,6 +3277,7 @@
                 expenseReduction: (parseFloat(document.getElementById('expenseReduction').value) || 0) / 100,
                 contribIncrease: (parseFloat(document.getElementById('contribIncrease').value) || 0) / 100,
                 salaryGrowth: (parseFloat(document.getElementById('salaryGrowth').value) || 0) / 100,
+                persYears: document.getElementById('persYearsToggle').checked ? parseFloat(document.getElementById('persYears').value) || 10 : null,
                 healthcareCost: parseFloat(document.getElementById('healthcareCost').value) || 0,
                 oneTimeExpenses: parseFloat(document.getElementById('oneTimeExpenses').value) || 0,
                 mikeSs: parseFloat(document.getElementById('mikeSs').value) || 0,
@@ -3277,7 +3303,7 @@
             let pension = 0;
             let pensionReduction = '';
             if (travisRetired) {
-                const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge);
+                const persCalc = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, travisAge, v.persYears);
                 pension = persCalc.annualPension;
                 if (persCalc.earlyRetireFactor < 1.0 || !persCalc.collecting) {
                     pensionReduction = persCalc.reductionNote;
@@ -3864,13 +3890,18 @@
 
             // Find Travis retirement phase for pension preview
             // Don't pass currentAge here - we want to show what pension will be when collecting
-            const pers = calculatePERSPension(v.travisRetireAge, v.salaryGrowth);
+            const pers = calculatePERSPension(v.travisRetireAge, v.salaryGrowth, null, v.persYears);
             document.getElementById('pensionPreview').textContent = formatCurrency(pers.annualPension) + '/yr';
 
             // Show when collection starts
-            const collectionNote = v.travisRetireAge < 55
+            const persLimited = v.persYears !== null;
+            let collectionNote = v.travisRetireAge < 55
                 ? `${pers.yearsOfService.toFixed(1)} yrs service, collect at 55`
                 : `${pers.yearsOfService.toFixed(1)} yrs service at age ${v.travisRetireAge}`;
+            if (persLimited) {
+                const leaveAge = Math.round(baseData.travisAge + (v.persYears - (baseData.currentYear - baseData.persStartYear)));
+                collectionNote += ` (leave PERS ~age ${leaveAge})`;
+            }
             document.getElementById('pensionSubtext').textContent = collectionNote;
 
             // Show early retirement reduction if applicable
@@ -4054,6 +4085,16 @@
         document.querySelectorAll('select').forEach(input => {
             input.addEventListener('change', update);
         });
+
+        // PERS years toggle — enable/disable the input
+        document.getElementById('persYearsToggle').addEventListener('change', function() {
+            document.getElementById('persYears').disabled = !this.checked;
+            update();
+        });
+        // Update current PERS years display
+        const persYrsNow = (baseData.currentYear - baseData.persStartYear).toFixed(1);
+        const persCurrentEl = document.getElementById('persYearsCurrent');
+        if (persCurrentEl) persCurrentEl.textContent = persYrsNow;
 
         // Initial render
         loadTheme();
